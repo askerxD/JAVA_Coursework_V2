@@ -10,8 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="627.0" prefWidth="1153.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="627.0" prefWidth="1153.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.javacw.HelloController">
    <children>
       <Label layoutX="21.0" layoutY="37.0" text="Malambe spare depot">
          <font>
@@ -23,16 +22,16 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Button layoutX="647.0" layoutY="22.0" mnemonicParsing="false" text="+ Add a new part" />
-      <Button layoutX="773.0" layoutY="22.0" mnemonicParsing="false" text="Update selected" />
-      <Button layoutX="895.0" layoutY="22.0" mnemonicParsing="false" text="Delete selected" />
+      <Button fx:id="addNewPartButton" layoutX="647.0" layoutY="22.0" mnemonicParsing="false" text="+ Add a new part" />
+      <Button fx:id="updateSelectedButton" layoutX="773.0" layoutY="22.0" mnemonicParsing="false" text="Update selected" />
+      <Button fx:id="deleteSelectedButton" layoutX="895.0" layoutY="22.0" mnemonicParsing="false" text="Delete selected" />
       <Label layoutX="199.0" layoutY="63.0" text="Keyword Search" />
       <Label layoutX="370.0" layoutY="63.0" text="Category" />
       <Label layoutX="472.0" layoutY="63.0" text="Min. price" />
       <Label layoutX="577.0" layoutY="63.0" text="Max. price" />
       <Button layoutX="675.0" layoutY="84.0" mnemonicParsing="false" text="Search" />
       <Button layoutX="751.0" layoutY="84.0" mnemonicParsing="false" text="Reset" />
-      <TableView layoutX="198.0" layoutY="151.0" prefHeight="443.0" prefWidth="794.0">
+      <TableView fx:id="inventoryTable" layoutX="198.0" layoutY="151.0" prefHeight="443.0" prefWidth="794.0">
         <columns>
           <TableColumn prefWidth="93.0" text="Part Code" />
           <TableColumn prefWidth="206.0" text="Description" />
@@ -43,23 +42,26 @@
             <TableColumn prefWidth="101.0" text="Last updated" />
         </columns>
       </TableView>
-      <TextField layoutX="199.0" layoutY="84.0" prefHeight="25.0" prefWidth="138.0" />
+      <TextField fx:id="keyworkSearchField" layoutX="199.0" layoutY="84.0" prefHeight="25.0" prefWidth="138.0" />
       <ChoiceBox layoutX="370.0" layoutY="84.0" prefHeight="25.0" prefWidth="54.0" />
-      <TextField layoutX="472.0" layoutY="84.0" prefHeight="25.0" prefWidth="76.0" />
-      <TextField layoutX="577.0" layoutY="84.0" prefHeight="25.0" prefWidth="76.0" />
-      <VBox layoutX="999.0" layoutY="46.0" prefHeight="531.0" prefWidth="154.0" />
+      <TextField fx:id="minPriceField" layoutX="472.0" layoutY="84.0" prefHeight="25.0" prefWidth="76.0" />
+      <TextField fx:id="maxPriceField" layoutX="577.0" layoutY="84.0" prefHeight="25.0" prefWidth="76.0" />
+      <VBox fx:id="lowStockWarning" layoutX="999.0" layoutY="46.0" prefHeight="531.0" prefWidth="154.0" />
       <Label layoutX="199.0" layoutY="594.0" text="Parts count : " />
-      <Label layoutX="265.0" layoutY="594.0" prefHeight="17.0" prefWidth="66.0" />
+      <Label fx:id="partsCount" layoutX="265.0" layoutY="594.0" prefHeight="17.0" prefWidth="66.0" />
       <Label layoutX="342.0" layoutY="594.0" text="Total inventory value : " />
-      <Label layoutX="465.0" layoutY="594.0" prefHeight="17.0" prefWidth="97.0" />
-      <Button layoutX="4.0" layoutY="84.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="Inventory Dashboard" />
-      <Button layoutX="4.0" layoutY="116.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="POS checkout" />
-      <Button layoutX="4.0" layoutY="148.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="Dealer Selection" />
-      <Button layoutX="5.0" layoutY="179.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="Audit Logs" />
+      <Label fx:id="totalnventoryValue" layoutX="465.0" layoutY="594.0" prefHeight="17.0" prefWidth="97.0" />
+      <Button fx:id="inventoryDashboardButton" layoutX="4.0" layoutY="84.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="Inventory Dashboard" />
+      <Button fx:id="posCheckoutButton" layoutX="4.0" layoutY="116.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="POS checkout" />
+      <Button fx:id="dealerSelectionButton" layoutX="4.0" layoutY="148.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="Dealer Selection" />
+      <Button fx:id="auditLoButton" layoutX="5.0" layoutY="179.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="173.0" text="Audit Logs" />
       <Label layoutX="1029.0" layoutY="26.0" snapToPixel="false" text="Low Stock Alerts">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
+      <Label layoutX="999.0" layoutY="569.0" text="Low stock Threshold" />
+      <TextField fx:id="lowStockThreshold" layoutX="999.0" layoutY="590.0" prefHeight="25.0" prefWidth="76.0" />
+      <Button fx:id="lowStockThresholdSave" layoutX="1081.0" layoutY="590.0" mnemonicParsing="false" text="Save" />
    </children>
 </Pane>
