@@ -46,7 +46,7 @@ public class InventoryParser {
                         price,
                         qty,
                         category,
-                        ValidationUtil.safeString(date),
+                        ValidationUtil.standardizeDate(date),
                         ValidationUtil.safeString(image)
                 );
                 parts.add(part);

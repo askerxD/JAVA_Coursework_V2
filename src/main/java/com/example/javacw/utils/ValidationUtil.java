@@ -1,5 +1,10 @@
 package com.example.javacw.utils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
+
 public class ValidationUtil {
 
     // Clean price values
@@ -52,5 +57,36 @@ public class ValidationUtil {
     // Check valid dealer code
     public static boolean isValidDealerCode(String code) {
         return code != null && code.matches("D\\d+");
+    }
+
+    // Standardize date to dd/mm/yyyy format
+    public static String standardizeDate(String rawDate) {
+        if (rawDate == null || rawDate.trim().isEmpty()) {
+            return "";
+        }
+         
+        String trimmed = rawDate.trim();
+        DateTimeFormatter targetFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+         
+        // Try various date formats
+        String[] formats = {
+            "yyyy-MM-dd",      // 2023-10-12
+            "dd/MM/yyyy",      // 12/05/2023
+            "MMM dd, yyyy",    // Oct 15, 2023
+            "dd-MMM-yyyy",     // 15-Aug-2023
+            "yyyy/MM/dd",      // 2023/11/20
+            "dd-MM-yyyy"       // 01-02-2024
+        };
+         
+        for (String format : formats) {
+            try {
+                LocalDate date = LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(format, Locale.ENGLISH));
+                return date.format(targetFormatter);
+            } catch (DateTimeParseException e) {
+                // Try next format
+            }
+        }
+         
+        return trimmed;
     }
 }
