@@ -3,6 +3,7 @@ package com.example.javacw;
 import com.example.javacw.objects.Part;
 import com.example.javacw.parsers.InventoryParser;
 import com.example.javacw.utils.LowStockUtil;
+import com.example.javacw.utils.SceneNavigationUtil;
 import com.example.javacw.utils.SearchUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -71,6 +72,7 @@ public class HelloController implements Initializable {
           setupAddNewPartButton();
           setupUpdateSelectedButton();
           setupDeleteSelectedButton();
+          setupNavigationButtons();
           populateCategories();
      }
 
@@ -100,6 +102,15 @@ public class HelloController implements Initializable {
      private void setupSearchButtons() {
           search.setOnAction(event -> performSearch());
           resetSearch.setOnAction(event -> resetFilters());
+     }
+
+     private void setupNavigationButtons() {
+          SceneNavigationUtil.setupNavigationButtons(
+                  inventoryDashboardButton,
+                  posCheckoutButton,
+                  dealerSelectionButton,
+                  auditLoButton
+          );
      }
 
      private void setupAddNewPartButton() {
@@ -162,6 +173,7 @@ public class HelloController implements Initializable {
                controller.setParentController(this);
 
                Stage stage = new Stage();
+               stage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
                stage.setTitle("Add New Part");
                stage.setScene(scene);
                stage.show();
@@ -173,12 +185,12 @@ public class HelloController implements Initializable {
 
      private void openUpdateItemWindow() {
           Part selectedPart = inventoryTable.getSelectionModel().getSelectedItem();
-            
+             
           if (selectedPart == null) {
                showErrorAlert("No Selection", "Please select a part to update.");
                return;
           }
-            
+             
           try {
                FXMLLoader loader = new FXMLLoader(getClass().getResource("updateItemScene.fxml"));
                Scene scene = new Scene(loader.load(), 600, 350);
@@ -188,6 +200,7 @@ public class HelloController implements Initializable {
                controller.setPart(selectedPart);
 
                Stage stage = new Stage();
+               stage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
                stage.setTitle("Update Part");
                stage.setScene(scene);
                stage.show();

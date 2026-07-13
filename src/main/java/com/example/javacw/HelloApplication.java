@@ -13,7 +13,7 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws IOException {
         stage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("dashboard.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
+        Scene scene = new Scene(fxmlLoader.load(), 1153, 627);
         stage.setTitle("Malambe spare depot");
         stage.setScene(scene);
         stage.show();
