@@ -5,10 +5,15 @@ import com.example.javacw.parsers.InventoryParser;
 import com.example.javacw.utils.LowStockUtil;
 import com.example.javacw.utils.SearchUtil;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,6 +68,9 @@ public class HelloController implements Initializable {
           loadInventoryData();
           setupLowStockThresholdButton();
           setupSearchButtons();
+          setupAddNewPartButton();
+          setupUpdateSelectedButton();
+          setupDeleteSelectedButton();
           populateCategories();
      }
 
@@ -92,6 +100,111 @@ public class HelloController implements Initializable {
      private void setupSearchButtons() {
           search.setOnAction(event -> performSearch());
           resetSearch.setOnAction(event -> resetFilters());
+     }
+
+     private void setupAddNewPartButton() {
+          addNewPartButton.setOnAction(event -> openAddItemWindow());
+     }
+
+     private void setupUpdateSelectedButton() {
+          if (updateSelectedButton != null) {
+               updateSelectedButton.setOnAction(event -> openUpdateItemWindow());
+               System.out.println("Update Selected Button handler registered successfully");
+          } else {
+               System.out.println("ERROR: updateSelectedButton is NULL - not properly injected from FXML");
+          }
+     }
+
+     private void setupDeleteSelectedButton() {
+          if (deleteSelectedButton != null) {
+               deleteSelectedButton.setOnAction(event -> handleDeleteSelected());
+               System.out.println("Delete Selected Button handler registered successfully");
+          } else {
+               System.out.println("ERROR: deleteSelectedButton is NULL - not properly injected from FXML");
+          }
+     }
+
+     private void handleDeleteSelected() {
+          Part selectedPart = inventoryTable.getSelectionModel().getSelectedItem();
+           
+          if (selectedPart == null) {
+               showErrorAlert("No Selection", "Please select a part to delete.");
+               return;
+          }
+           
+          Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+          confirmAlert.setTitle("Confirm Delete");
+          confirmAlert.setHeaderText("Delete Part?");
+          confirmAlert.setContentText("Are you sure you want to delete '" + selectedPart.getPartCode() + " - " + selectedPart.getName() + "'? This action cannot be undone.");
+           
+          if (confirmAlert.showAndWait().get() == ButtonType.OK) {
+               allParts.remove(selectedPart);
+               inventoryTable.getItems().remove(selectedPart);
+               updateInventoryStats(allParts);
+               displayLowStockWarnings(currentThreshold);
+               showSuccessAlert("Success", "Part deleted successfully!");
+          }
+     }
+
+     private void showSuccessAlert(String title, String message) {
+          Alert alert = new Alert(Alert.AlertType.INFORMATION);
+          alert.setTitle(title);
+          alert.setContentText(message);
+          alert.showAndWait();
+     }
+
+     private void openAddItemWindow() {
+          try {
+               FXMLLoader loader = new FXMLLoader(getClass().getResource("addItemScene.fxml"));
+               Scene scene = new Scene(loader.load(), 600, 400);
+
+               ANPController controller = loader.getController();
+               controller.setParentController(this);
+
+               Stage stage = new Stage();
+               stage.setTitle("Add New Part");
+               stage.setScene(scene);
+               stage.show();
+          } catch (IOException e) {
+               e.printStackTrace();
+               showErrorAlert("Error", "Failed to open Add Item window");
+          }
+     }
+
+     private void openUpdateItemWindow() {
+          Part selectedPart = inventoryTable.getSelectionModel().getSelectedItem();
+            
+          if (selectedPart == null) {
+               showErrorAlert("No Selection", "Please select a part to update.");
+               return;
+          }
+            
+          try {
+               FXMLLoader loader = new FXMLLoader(getClass().getResource("updateItemScene.fxml"));
+               Scene scene = new Scene(loader.load(), 600, 350);
+
+               UPDController controller = loader.getController();
+               controller.setParentController(this);
+               controller.setPart(selectedPart);
+
+               Stage stage = new Stage();
+               stage.setTitle("Update Part");
+               stage.setScene(scene);
+               stage.show();
+          } catch (IOException e) {
+               e.printStackTrace();
+               showErrorAlert("Error", "Failed to open Update Item window: " + e.getMessage());
+          } catch (Exception e) {
+               e.printStackTrace();
+               showErrorAlert("Error", "An unexpected error occurred: " + e.getMessage());
+          }
+     }
+
+     private void showErrorAlert(String title, String message) {
+          Alert alert = new Alert(Alert.AlertType.ERROR);
+          alert.setTitle(title);
+          alert.setContentText(message);
+          alert.showAndWait();
      }
 
      private void performSearch() {
@@ -193,5 +306,17 @@ public class HelloController implements Initializable {
           TableColumn<Part, String> lastUpdatedCol = (TableColumn<Part, String>) inventoryTable.getColumns().get(6);
           lastUpdatedCol.setCellValueFactory(new PropertyValueFactory<>("dateAdded"));
      }
-}
 
+     public void addNewPart(Part newPart) {
+          allParts.add(newPart);
+          inventoryTable.getItems().add(newPart);
+          updateInventoryStats(allParts);
+          displayLowStockWarnings(currentThreshold);
+     }
+
+     public void refreshInventoryTable() {
+          inventoryTable.refresh();
+          updateInventoryStats(allParts);
+          displayLowStockWarnings(currentThreshold);
+     }
+}
