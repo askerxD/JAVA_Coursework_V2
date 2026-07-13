@@ -165,7 +165,7 @@ public class HelloController implements Initializable {
                String text = part.getPartCode() + " - " + part.getName() + "\n" +
                             "remaining | " + part.getQuantity();
                warningLabel.setText(text);
-               warningLabel.setStyle("-fx-text-fill: #ff6b6b; -fx-font-size: 11;");
+               warningLabel.setStyle("-fx-text-fill: #ff6b6b; -fx-font-size: 14;");
                warningLabel.setWrapText(true);
                lowStockWarning.getChildren().add(warningLabel);
           }
