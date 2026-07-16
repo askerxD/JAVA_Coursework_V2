@@ -28,47 +28,55 @@
          </font>
       </Label>
       <Label layoutX="274.0" layoutY="233.0" text="DealerID : " />
-      <Label layoutX="274.0" layoutY="255.0" text="Contact Number : " />
-      <Label layoutX="274.0" layoutY="276.0" text="Location : " />
+      <Label layoutX="274.0" layoutY="274.0" text="Contact Number : " />
+      <Label layoutX="274.0" layoutY="295.0" text="Location : " />
       <Label layoutX="703.0" layoutY="208.0" text="Dealer 2">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
       <Label layoutX="703.0" layoutY="233.0" text="DealerID : " />
-      <Label layoutX="703.0" layoutY="255.0" text="Contact Number : " />
-      <Label layoutX="703.0" layoutY="276.0" text="Location : " />
+      <Label layoutX="703.0" layoutY="274.0" text="Contact Number : " />
+      <Label layoutX="703.0" layoutY="295.0" text="Location : " />
       <Label layoutX="274.0" layoutY="361.0" text="Dealer 3">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
       <Label layoutX="274.0" layoutY="386.0" text="DealerID : " />
-      <Label layoutX="274.0" layoutY="408.0" text="Contact Number : " />
-      <Label layoutX="274.0" layoutY="429.0" text="Location : " />
+      <Label layoutX="274.0" layoutY="427.0" text="Contact Number : " />
+      <Label layoutX="274.0" layoutY="448.0" text="Location : " />
       <Label layoutX="703.0" layoutY="361.0" text="Dealer 4">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
       <Label layoutX="703.0" layoutY="386.0" text="DealerID : " />
-      <Label layoutX="703.0" layoutY="408.0" text="Contact Number : " />
-      <Label layoutX="703.0" layoutY="429.0" text="Location : " />
+      <Label layoutX="703.0" layoutY="427.0" text="Contact Number : " />
+      <Label layoutX="703.0" layoutY="448.0" text="Location : " />
       <Label fx:id="dealerID1" layoutX="371.0" layoutY="233.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerContact1" layoutX="371.0" layoutY="255.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerLocation1" layoutX="372.0" layoutY="276.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerContact1" layoutX="371.0" layoutY="274.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerLocation1" layoutX="372.0" layoutY="295.0" prefHeight="17.0" prefWidth="217.0" />
       <Label fx:id="dealerID2" layoutX="801.0" layoutY="233.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerContact2" layoutX="801.0" layoutY="255.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerLocation2" layoutX="801.0" layoutY="276.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerContact2" layoutX="801.0" layoutY="274.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerLocation2" layoutX="801.0" layoutY="295.0" prefHeight="17.0" prefWidth="217.0" />
       <Label fx:id="dealerID3" layoutX="372.0" layoutY="388.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerContact3" layoutX="372.0" layoutY="409.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerLocation3" layoutX="372.0" layoutY="429.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerContact3" layoutX="372.0" layoutY="428.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerLocation3" layoutX="372.0" layoutY="448.0" prefHeight="17.0" prefWidth="217.0" />
       <Label fx:id="dealerID4" layoutX="800.0" layoutY="388.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerContact4" layoutX="800.0" layoutY="410.0" prefHeight="17.0" prefWidth="217.0" />
-      <Label fx:id="dealerLocation4" layoutX="801.0" layoutY="429.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerContact4" layoutX="800.0" layoutY="429.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerLocation4" layoutX="801.0" layoutY="448.0" prefHeight="17.0" prefWidth="217.0" />
       <Label layoutX="532.0" layoutY="545.0" prefHeight="17.0" prefWidth="117.0" text="dealers loaded from :" />
       <Label layoutX="650.0" layoutY="545.0" text="dealers_legacy.txt" />
       <Label layoutX="477.0" layoutY="545.0" prefHeight="17.0" prefWidth="38.0" text="Pool:" />
       <Label layoutX="509.0" layoutY="545.0" prefHeight="17.0" prefWidth="23.0" text=" 12" />
+      <Label layoutX="274.0" layoutY="253.0" text="Name : " />
+      <Label layoutX="703.0" layoutY="253.0" text="Name :" />
+      <Label layoutX="274.0" layoutY="406.0" text="Name :" />
+      <Label layoutX="703.0" layoutY="406.0" text="Name :" />
+      <Label fx:id="dealerName1" layoutX="371.0" layoutY="253.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerName2" layoutX="801.0" layoutY="253.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerName3" layoutX="372.0" layoutY="407.0" prefHeight="17.0" prefWidth="217.0" />
+      <Label fx:id="dealerName4" layoutX="800.0" layoutY="408.0" prefHeight="17.0" prefWidth="217.0" />
    </children>
 </Pane>
