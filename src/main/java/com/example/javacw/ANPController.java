@@ -1,22 +1,14 @@
-
 package com.example.javacw;
 
 import com.example.javacw.objects.Part;
-import com.example.javacw.parsers.InventoryParser;
-import com.example.javacw.utils.LowStockUtil;
-import com.example.javacw.utils.SearchUtil;
+import com.example.javacw.utils.ValidationUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 public class ANPController implements Initializable {
     @FXML
@@ -51,7 +43,7 @@ public class ANPController implements Initializable {
     }
 
     private void setupCategoryDropdown() {
-        Category.getItems().addAll("Engine", "Electrical", "Brakes", "Bodywork");
+        Category.getItems().addAll("ENGINE", "ELECTRICAL", "BRAKES", "BODYWORK");
     }
 
     private void setupButtonHandlers() {
@@ -65,40 +57,66 @@ public class ANPController implements Initializable {
         confirmAlert.setHeaderText("Cancel Operation?");
         confirmAlert.setContentText("Are you sure you want to cancel? Any unsaved data will be lost.");
 
-        if (confirmAlert.showAndWait().get() == ButtonType.OK) {
+        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             closeWindow();
         }
     }
 
     private void handleSavePart() {
-        if (validateInput()) {
-            try {
-                String partCode = PartCode.getText().trim();
-                String description = Description.getText().trim();
-                String brand = Brand.getText().trim();
-                double price = Double.parseDouble(Price.getText().trim());
-                int stockQty = Integer.parseInt(StockQty.getText().trim());
-                String category = Category.getValue();
-                LocalDate dateAdded = LastUpdated.getValue();
-                String dateAddedStr = dateAdded != null ? dateAdded.toString() : LocalDate.now().toString();
+        if (!validateInput()) {
+            return;
+        }
+        try {
+            String partCode = PartCode.getText().trim().toUpperCase();
+            String description = Description.getText().trim();
+            String brand = Brand.getText().trim();
+            double price = Double.parseDouble(Price.getText().trim());
+            int stockQty = Integer.parseInt(StockQty.getText().trim());
+            String category = ValidationUtil.normalizeCategory(Category.getValue());
+            LocalDate dateAdded = LastUpdated.getValue();
+            String dateAddedStr = dateAdded != null
+                    ? dateAdded.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    : LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-                Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, "");
-
-                if (parentController != null) {
-                    parentController.addNewPart(newPart);
-                }
-
-                showSuccessAlert("Success", "Part added successfully!");
-                closeWindow();
-            } catch (NumberFormatException e) {
-                showErrorAlert("Invalid Input", "Price must be a valid number and Stock Qty must be an integer.");
+            if (!ValidationUtil.isNonNegativePrice(price)) {
+                showErrorAlert("Validation Error", "Price cannot be negative.");
+                return;
             }
+            if (!ValidationUtil.isNonNegativeQuantity(stockQty)) {
+                showErrorAlert("Validation Error", "Stock quantity cannot be negative.");
+                return;
+            }
+            if (parentController != null && parentController.partCodeExists(partCode)) {
+                showErrorAlert("Duplicate Part Code",
+                        "Part code '" + partCode + "' already exists. Please use a unique code.");
+                return;
+            }
+
+            Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, "");
+
+            if (parentController != null) {
+                if (!parentController.addNewPart(newPart)) {
+                    showErrorAlert("Duplicate Part Code",
+                            "Part code '" + partCode + "' already exists. Please use a unique code.");
+                    return;
+                }
+            }
+
+            showSuccessAlert("Success", "Part added successfully!");
+            closeWindow();
+        } catch (NumberFormatException e) {
+            showErrorAlert("Invalid Input", "Price must be a valid number and Stock Qty must be an integer.");
         }
     }
 
     private boolean validateInput() {
-        if (PartCode.getText().trim().isEmpty()) {
+        String partCode = PartCode.getText().trim().toUpperCase();
+        if (partCode.isEmpty()) {
             showErrorAlert("Validation Error", "Part Code is required.");
+            return false;
+        }
+        if (!ValidationUtil.isValidPartCode(partCode)) {
+            showErrorAlert("Validation Error", "Part Code must match format P followed by digits (e.g. P011).");
             return false;
         }
         if (Description.getText().trim().isEmpty()) {
@@ -147,3 +165,5 @@ public class ANPController implements Initializable {
         alert.showAndWait();
     }
 }
+
+ 
