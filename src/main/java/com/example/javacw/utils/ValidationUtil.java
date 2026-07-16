@@ -16,9 +16,9 @@ public class ValidationUtil {
 
         // remove currency symbols and text
         cleaned = cleaned.replace("Rs.", "")
-                         .replace("Rs", "")
-                         .replace(",", "")
-                         .trim();
+                .replace("Rs", "")
+                .replace(",", "")
+                .trim();
         try {
             return Double.parseDouble(cleaned);
         } catch (NumberFormatException e) {
@@ -59,25 +59,33 @@ public class ValidationUtil {
         return code != null && code.matches("D\\d+");
     }
 
+    public static boolean isNonNegativePrice(double price) {
+        return price >= 0;
+    }
+
+    public static boolean isNonNegativeQuantity(int quantity) {
+        return quantity >= 0;
+    }
+
     // Standardize date to dd/mm/yyyy format
     public static String standardizeDate(String rawDate) {
         if (rawDate == null || rawDate.trim().isEmpty()) {
             return "";
         }
-         
+
         String trimmed = rawDate.trim();
         DateTimeFormatter targetFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-         
+
         // Try various date formats
         String[] formats = {
-            "yyyy-MM-dd",      // 2023-10-12
-            "dd/MM/yyyy",      // 12/05/2023
-            "MMM dd, yyyy",    // Oct 15, 2023
-            "dd-MMM-yyyy",     // 15-Aug-2023
-            "yyyy/MM/dd",      // 2023/11/20
-            "dd-MM-yyyy"       // 01-02-2024
+                "yyyy-MM-dd",      // 2023-10-12
+                "dd/MM/yyyy",      // 12/05/2023
+                "MMM dd, yyyy",    // Oct 15, 2023
+                "dd-MMM-yyyy",     // 15-Aug-2023
+                "yyyy/MM/dd",      // 2023/11/20
+                "dd-MM-yyyy"       // 01-02-2024
         };
-         
+
         for (String format : formats) {
             try {
                 LocalDate date = LocalDate.parse(trimmed, DateTimeFormatter.ofPattern(format, Locale.ENGLISH));
@@ -86,7 +94,7 @@ public class ValidationUtil {
                 // Try next format
             }
         }
-         
+
         return trimmed;
     }
 }
