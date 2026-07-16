@@ -11,13 +11,14 @@ import java.util.ArrayList;
 public class InventoryService {
     private ArrayList<Part> parts = new ArrayList<>();
     private final String filePath;
+    private final AuditService auditService = AuditService.getDefault();
     public InventoryService(String filePath) {
         this.filePath = filePath;
         loadInventory();
     }
     // Load inventory from file
     public void loadInventory() {
-        parts = InventoryParser.parseInventoryFile(filePath); 
+        parts = InventoryParser.parseInventoryFile(filePath);
         // Group by category and sort by part code
         SortUtil.sortPartCatCode(parts);
     }
@@ -48,7 +49,7 @@ public class InventoryService {
     // Update part
     public boolean updatePart(String code, Part updatedPart) {
         for (int i = 0; i < parts.size(); i++) {
-            if (parts.get(i).getPartCode().equals(code)) {
+            if (parts.get(i).getPartCode().equalsIgnoreCase(code)) {
                 parts.set(i, updatedPart);
                 // Re-sort after modification
                 SortUtil.sortPartCatCode(parts);
@@ -61,13 +62,23 @@ public class InventoryService {
     // Delete part
     public boolean deletePart(String code) {
         for (int i = 0; i < parts.size(); i++) {
-            if (parts.get(i).getPartCode().equals(code)) {
+            if (parts.get(i).getPartCode().equalsIgnoreCase(code)) {
                 parts.remove(i);
                 saveInventory();
                 return true;
             }
         }
         return false;
+    }
+
+    // Persist in-place edits (e.g. after fields of an existing Part object are changed)
+    public void persistAndResort() {
+        SortUtil.sortPartCatCode(parts);
+        saveInventory();
+    }
+
+    public boolean partCodeExists(String code) {
+        return getPartByCode(code) != null;
     }
     // Get all parts
     public ArrayList<Part> getAllParts() {
@@ -124,6 +135,7 @@ public class InventoryService {
                 part.getQuantity() - quantitySold
         );
         saveInventory();
+        auditService.logSaleAsCashier("partCode=" + partCode + ", quantitySold=" + quantitySold);
         return true;
     }
 }

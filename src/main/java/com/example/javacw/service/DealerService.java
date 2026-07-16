@@ -2,6 +2,7 @@ package com.example.javacw.service;
 
 import com.example.javacw.objects.Dealer;
 import com.example.javacw.parsers.DealerParser;
+import com.example.javacw.utils.SortUtil;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -20,14 +21,16 @@ public class DealerService {
     public ArrayList<Dealer> getAllDealers() {
         return dealers;
     }
-    // Select 4 unique random dealers
+    // Select 4 unique random dealers, then sort by location
     public ArrayList<Dealer> getRandomFourDealers() {
 
         ArrayList<Dealer> selected = new ArrayList<>();
         Random random = new Random();
 
         if (dealers.size() <= 4) {
-            return new ArrayList<>(dealers);
+            selected = new ArrayList<>(dealers);
+            SortUtil.sortDealersByLocation(selected);
+            return selected;
         }
         while (selected.size() < 4) {
 
@@ -39,6 +42,7 @@ public class DealerService {
                 selected.add(dealer);
             }
         }
+        SortUtil.sortDealersByLocation(selected);
         return selected;
     }
     // Prevent duplicate dealer selection
