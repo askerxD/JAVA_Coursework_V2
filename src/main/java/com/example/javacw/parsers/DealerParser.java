@@ -20,7 +20,7 @@ public class DealerParser {
                 }
                 // change delimeters to commas
                 line = line.replace("|", ",")
-                           .replace(";", ",");
+                        .replace(";", ",");
 
                 String[] words = line.split(",");
 
