@@ -47,6 +47,14 @@ public class DealerSelectionController implements Initializable {
     private Label dealerLocation4;
     @FXML
     private Button refresh;
+    @FXML
+    private Label dealerName1;
+    @FXML
+    private Label dealerName2;
+    @FXML
+    private Label dealerName3;
+    @FXML
+    private Label dealerName4;
 
     private DealerService dealerService;
 
@@ -75,23 +83,25 @@ public class DealerSelectionController implements Initializable {
 
         ArrayList<Dealer> selected = dealerService.getRandomFourDealers();
 
-        setDealerLabels(selected, 0, dealerID1, dealerContact1, dealerLocation1);
-        setDealerLabels(selected, 1, dealerID2, dealerContact2, dealerLocation2);
-        setDealerLabels(selected, 2, dealerID3, dealerContact3, dealerLocation3);
-        setDealerLabels(selected, 3, dealerID4, dealerContact4, dealerLocation4);
+        setDealerLabels(selected, 0, dealerID1, dealerName1, dealerContact1, dealerLocation1);
+        setDealerLabels(selected, 1, dealerID2, dealerName2, dealerContact2, dealerLocation2);
+        setDealerLabels(selected, 2, dealerID3, dealerName3, dealerContact3, dealerLocation3);
+        setDealerLabels(selected, 3, dealerID4, dealerName4, dealerContact4, dealerLocation4);
     }
 
     private void setDealerLabels(ArrayList<Dealer> selected,
                                  int index,
                                  Label idLabel,
+                                 Label nameLabel,
                                  Label contactLabel,
                                  Label locationLabel) {
-        if (idLabel == null || contactLabel == null || locationLabel == null) {
+        if (idLabel == null || nameLabel == null || contactLabel == null || locationLabel == null) {
             return;
         }
 
         if (selected == null || index >= selected.size()) {
             idLabel.setText("-");
+            nameLabel.setText("-");
             contactLabel.setText("-");
             locationLabel.setText("-");
             return;
@@ -99,6 +109,7 @@ public class DealerSelectionController implements Initializable {
 
         Dealer dealer = selected.get(index);
         idLabel.setText(nullToDash(dealer.getDealerId()));
+        nameLabel.setText(nullToDash(dealer.getName()));
         contactLabel.setText(nullToDash(dealer.getContactNumber()));
         locationLabel.setText(nullToDash(dealer.getLocation()));
     }
@@ -111,3 +122,4 @@ public class DealerSelectionController implements Initializable {
         return trimmed.isEmpty() ? "-" : trimmed;
     }
 }
+
