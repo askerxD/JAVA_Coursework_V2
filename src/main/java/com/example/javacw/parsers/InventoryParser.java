@@ -6,21 +6,20 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class InventoryParser {
+    // Temporary marker so dates like "Oct 15, 2023" survive delimiter normalisation
+    private static final String DATE_COMMA_MARKER = "##DATECOMMA##";
+
     public static ArrayList<Part> parseInventoryFile(String filePath) {
         ArrayList<Part> parts = new ArrayList<>();
         try (BufferedReader file = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = file.readLine()) != null) {
-                // skip the empty lines
-                if (line.trim().isEmpty()){
+                if (line.trim().isEmpty()) {
                     continue;
                 }
 
-                // change delimeters to commas
-                line = line.replace("|", ",")
-                           .replace(";", ",");
-                String[] words = line.split(",");
-                // safe extraction with fallback values
+                String[] words = splitLegacyLine(line);
+
                 String partCode = get(words, 0);
                 String name = get(words, 1);
                 String brand = get(words, 2);
@@ -30,13 +29,12 @@ public class InventoryParser {
                 String date = get(words, 6);
                 String image = get(words, 7);
 
-                // validation
                 if (!ValidationUtil.isValidPartCode(partCode)) {
-                    continue; // skip invalid records
+                    continue;
                 }
+
                 double price = ValidationUtil.parsePrice(priceStr);
                 int qty = ValidationUtil.parseQuantity(qtyStr);
-
                 category = ValidationUtil.normalizeCategory(category);
 
                 Part part = new Part(
@@ -56,11 +54,121 @@ public class InventoryParser {
         }
         return parts;
     }
-    private static String get(String[] arr, int index) {
-        if (index >= arr.length){
-            return "";
-        }else{
-        return arr[index].trim();
+
+    /**
+     * Protects month-name dates that contain commas, normalises | and ; to commas,
+     * then splits. Extra fragments from a date comma are merged back if needed.
+     */
+    private static String[] splitLegacyLine(String line) {
+        String protectedLine = protectCommaDates(line);
+        protectedLine = protectedLine.replace("|", ",")
+                .replace(";", ",");
+
+        String[] raw = protectedLine.split(",", -1);
+        ArrayList<String> fields = new ArrayList<>();
+        for (int i = 0; i < raw.length; i++) {
+            fields.add(raw[i].replace(DATE_COMMA_MARKER, ",").trim());
         }
+
+        // If a date comma still produced an extra field, merge date pieces at index 6+7
+        while (fields.size() > 8) {
+            String left = fields.get(6);
+            String right = fields.get(7);
+            if (isFourDigitYear(right)) {
+                fields.set(6, left + ", " + right);
+                fields.remove(7);
+            } else {
+                break;
+            }
+        }
+
+        return fields.toArray(new String[0]);
+    }
+
+    private static String protectCommaDates(String line) {
+        String[] months = {
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        };
+        String result = line;
+        for (int m = 0; m < months.length; m++) {
+            result = protectOneMonthDate(result, months[m]);
+        }
+        return result;
+    }
+
+    private static String protectOneMonthDate(String line, String month) {
+        StringBuilder out = new StringBuilder();
+        int i = 0;
+        while (i < line.length()) {
+            int found = indexOfIgnoreCase(line, month, i);
+            if (found < 0) {
+                out.append(line.substring(i));
+                break;
+            }
+            out.append(line.substring(i, found));
+
+            int pos = found + month.length();
+            if (pos >= line.length() || line.charAt(pos) != ' ') {
+                out.append(line.substring(found, found + month.length()));
+                i = found + month.length();
+                continue;
+            }
+            pos++; // skip space after month
+
+            int dayStart = pos;
+            while (pos < line.length() && Character.isDigit(line.charAt(pos))) {
+                pos++;
+            }
+            if (pos == dayStart || pos >= line.length() || line.charAt(pos) != ',') {
+                out.append(line.substring(found, found + month.length()));
+                i = found + month.length();
+                continue;
+            }
+            pos++; // skip comma after day
+
+            while (pos < line.length() && line.charAt(pos) == ' ') {
+                pos++;
+            }
+            int yearStart = pos;
+            while (pos < line.length() && Character.isDigit(line.charAt(pos))) {
+                pos++;
+            }
+            if (pos - yearStart != 4) {
+                out.append(line.substring(found, found + month.length()));
+                i = found + month.length();
+                continue;
+            }
+
+            String dateText = line.substring(found, pos);
+            out.append(dateText.replace(",", DATE_COMMA_MARKER));
+            i = pos;
+        }
+        return out.toString();
+    }
+
+    private static int indexOfIgnoreCase(String text, String target, int fromIndex) {
+        String lowerText = text.toLowerCase();
+        String lowerTarget = target.toLowerCase();
+        return lowerText.indexOf(lowerTarget, fromIndex);
+    }
+
+    private static boolean isFourDigitYear(String value) {
+        if (value == null || value.length() != 4) {
+            return false;
+        }
+        for (int i = 0; i < 4; i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String get(String[] arr, int index) {
+        if (index >= arr.length) {
+            return "";
+        }
+        return arr[index].trim();
     }
 }
