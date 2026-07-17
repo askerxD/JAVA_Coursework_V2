@@ -10,18 +10,35 @@ public class CartService {
     public boolean addToCart(Part part, int quantity) {
         if (quantity <= 0) return false;
         if (part == null) return false;
-        if (quantity > part.getQuantity()) return false;
+
+        int available = getAvailableQuantity(part);
+        if (quantity > available) return false;
+
         // check if already exists
         for (CartItem item : cart) {
             if (item.getPart().getPartCode().equals(part.getPartCode())) {
-                int newQty = item.getQuantity() + quantity;
-                if (newQty > part.getQuantity()) return false;
-                item.setQuantity(newQty);
+                item.setQuantity(item.getQuantity() + quantity);
                 return true;
             }
         }
         cart.add(new CartItem(part, quantity));
         return true;
+    }
+
+    public int getQuantityInCart(String partCode) {
+        for (CartItem item : cart) {
+            if (item.getPart().getPartCode().equals(partCode)) {
+                return item.getQuantity();
+            }
+        }
+        return 0;
+    }
+
+    public int getAvailableQuantity(Part part) {
+        if (part == null) {
+            return 0;
+        }
+        return part.getQuantity() - getQuantityInCart(part.getPartCode());
     }
     // Remove item from cart
     public void removeFromCart(String partCode) {
@@ -32,6 +49,29 @@ public class CartService {
             }
         }
     }
+
+    // Remove a quantity from a cart item
+    public boolean removeQuantityFromCart(String partCode, int quantity) {
+        if (quantity <= 0) {
+            return false;
+        }
+        for (int i = 0; i < cart.size(); i++) {
+            CartItem item = cart.get(i);
+            if (item.getPart().getPartCode().equals(partCode)) {
+                if (quantity > item.getQuantity()) {
+                    return false;
+                }
+                int newQty = item.getQuantity() - quantity;
+                if (newQty == 0) {
+                    cart.remove(i);
+                } else {
+                    item.setQuantity(newQty);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
     // Get cart items
     public ArrayList<CartItem> getCartItems() {
         return cart;
@@ -40,23 +80,48 @@ public class CartService {
     public void clearCart() {
         cart.clear();
     }
+    public double getSubtotalBeforeDiscounts() {
+        double total = 0;
+        for (CartItem item : cart) {
+            total += item.getPart().getPrice() * item.getQuantity();
+        }
+        return total;
+    }
+
+    public double getTotalAfterBulkDiscount() {
+        double total = 0;
+        for (CartItem item : cart) {
+            double lineTotal = item.getPart().getPrice() * item.getQuantity();
+            if (item.getQuantity() >= 3) {
+                lineTotal *= 0.95;
+            }
+            total += lineTotal;
+        }
+        return total;
+    }
+
+    public double getBulkDiscountAmount() {
+        return getSubtotalBeforeDiscounts() - getTotalAfterBulkDiscount();
+    }
+
+    public double getSynergyDiscountAmount() {
+        return getTotalAfterBulkDiscount() - calculateTotal();
+    }
+
     // Calculate total with discounts
     public double calculateTotal() {
-        double total = 0;
+        double total = getTotalAfterBulkDiscount();
+        if (hasEngineAndElectrical()) {
+            total *= 0.90;
+        }
+        return total;
+    }
+
+    private boolean hasEngineAndElectrical() {
         boolean hasEngine = false;
         boolean hasElectrical = false;
         for (CartItem item : cart) {
-            Part part = item.getPart();
-            int qty = item.getQuantity();
-            double price = part.getPrice();
-            double subtotal = price * qty;
-            // BULK DISCOUNT (5%)
-            if (qty >= 3) {
-                subtotal = subtotal * 0.95;
-            }
-            total += subtotal;
-            // check synergy conditions
-            String category = part.getCategory().toUpperCase();
+            String category = item.getPart().getCategory().toUpperCase();
             if (category.contains("ENGINE")) {
                 hasEngine = true;
             }
@@ -64,11 +129,7 @@ public class CartService {
                 hasElectrical = true;
             }
         }
-        // SYNERGY DISCOUNT (10%)
-        if (hasEngine && hasElectrical) {
-            total = total * 0.90;
-        }
-        return total;
+        return hasEngine && hasElectrical;
     }
     // Validate checkout
     public boolean canCheckout() {
