@@ -1,23 +1,16 @@
-
 package com.example.javacw;
 
 import com.example.javacw.objects.Part;
-import com.example.javacw.parsers.InventoryParser;
-import com.example.javacw.utils.LowStockUtil;
-import com.example.javacw.utils.SearchUtil;
+import com.example.javacw.service.AuditService;
+import com.example.javacw.utils.ValidationUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 public class UPDController implements Initializable {
     @FXML
@@ -41,6 +34,8 @@ public class UPDController implements Initializable {
 
     private HelloController parentController;
     private Part selectedPart;
+    private String originalPartCode;
+    private final AuditService auditService = AuditService.getDefault();
 
     public void setParentController(HelloController controller) {
         this.parentController = controller;
@@ -48,6 +43,7 @@ public class UPDController implements Initializable {
 
     public void setPart(Part part) {
         this.selectedPart = part;
+        this.originalPartCode = part != null ? part.getPartCode() : null;
         populateFields(part);
     }
 
@@ -58,7 +54,7 @@ public class UPDController implements Initializable {
     }
 
     private void setupCategoryDropdown() {
-        Category.getItems().addAll("Engine", "Electrical", "Brakes", "Bodywork");
+        Category.getItems().addAll("ENGINE", "ELECTRICAL", "BRAKES", "BODYWORK");
     }
 
     private void setupButtonHandlers() {
@@ -73,22 +69,19 @@ public class UPDController implements Initializable {
             Brand.setText(part.getBrand());
             Price.setText(String.valueOf(part.getPrice()));
             StockQty.setText(String.valueOf(part.getQuantity()));
-            Category.setValue(part.getCategory());
-            
+            Category.setValue(ValidationUtil.normalizeCategory(part.getCategory()));
+
             try {
                 String dateStr = part.getDateAdded();
                 LocalDate date;
-                
-                // Try parsing with ISO format first (YYYY-MM-DD)
+
                 try {
                     date = LocalDate.parse(dateStr);
                 } catch (Exception e1) {
-                    // If that fails, try DD/MM/YYYY format
                     try {
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                         date = LocalDate.parse(dateStr, formatter);
                     } catch (Exception e2) {
-                        // If that also fails, try MM/DD/YYYY format
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
                         date = LocalDate.parse(dateStr, formatter);
                     }
@@ -96,8 +89,6 @@ public class UPDController implements Initializable {
                 LastUpdated.setValue(date);
             } catch (Exception e) {
                 System.out.println("Error parsing date: " + part.getDateAdded());
-                e.printStackTrace();
-                // Set to today's date if parsing fails
                 LastUpdated.setValue(LocalDate.now());
             }
         }
@@ -109,48 +100,90 @@ public class UPDController implements Initializable {
         confirmAlert.setHeaderText("Cancel Operation?");
         confirmAlert.setContentText("Are you sure you want to cancel? Any unsaved changes will be lost.");
 
-        if (confirmAlert.showAndWait().get() == ButtonType.OK) {
+        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             closeWindow();
         }
     }
 
     private void handleSavePart() {
-        if (validateInput()) {
-            try {
-                String partCode = PartCode.getText().trim();
-                String description = Description.getText().trim();
-                String brand = Brand.getText().trim();
-                double price = Double.parseDouble(Price.getText().trim());
-                int stockQty = Integer.parseInt(StockQty.getText().trim());
-                String category = Category.getValue();
-                LocalDate dateAdded = LastUpdated.getValue();
-                String dateAddedStr = dateAdded != null ? dateAdded.toString() : LocalDate.now().toString();
+        if (!validateInput()) {
+            return;
+        }
+        try {
+            String partCode = PartCode.getText().trim().toUpperCase();
+            String description = Description.getText().trim();
+            String brand = Brand.getText().trim();
+            double price = Double.parseDouble(Price.getText().trim());
+            int stockQty = Integer.parseInt(StockQty.getText().trim());
+            String category = ValidationUtil.normalizeCategory(Category.getValue());
+            LocalDate dateAdded = LastUpdated.getValue();
+            String dateAddedStr = dateAdded != null
+                    ? dateAdded.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    : LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-                if (selectedPart != null) {
-                    selectedPart.setPartCode(partCode);
-                    selectedPart.setName(description);
-                    selectedPart.setBrand(brand);
-                    selectedPart.setPrice(price);
-                    selectedPart.setQuantity(stockQty);
-                    selectedPart.setCategory(category);
-                    selectedPart.setDateAdded(dateAddedStr);
+            if (!ValidationUtil.isNonNegativePrice(price)) {
+                showErrorAlert("Validation Error", "Price cannot be negative.");
+                return;
+            }
+            if (!ValidationUtil.isNonNegativeQuantity(stockQty)) {
+                showErrorAlert("Validation Error", "Stock quantity cannot be negative.");
+                return;
+            }
 
-                    if (parentController != null) {
-                        parentController.refreshInventoryTable();
-                    }
+            // If part code changed, ensure the new code is not already used by another part
+            if (parentController != null
+                    && !partCode.equalsIgnoreCase(originalPartCode)
+                    && parentController.partCodeExists(partCode)) {
+                showErrorAlert("Duplicate Part Code",
+                        "Part code '" + partCode + "' already exists. Please use a unique code.");
+                return;
+            }
+
+            if (selectedPart != null) {
+                String before = "name=" + safe(selectedPart.getName()) +
+                        ", brand=" + safe(selectedPart.getBrand()) +
+                        ", price=" + selectedPart.getPrice() +
+                        ", qty=" + selectedPart.getQuantity() +
+                        ", cat=" + safe(selectedPart.getCategory()) +
+                        ", date=" + safe(selectedPart.getDateAdded());
+
+                selectedPart.setPartCode(partCode);
+                selectedPart.setName(description);
+                selectedPart.setBrand(brand);
+                selectedPart.setPrice(price);
+                selectedPart.setQuantity(stockQty);
+                selectedPart.setCategory(category);
+                selectedPart.setDateAdded(dateAddedStr);
+
+                if (parentController != null) {
+                    parentController.refreshInventoryTable();
                 }
 
-                showSuccessAlert("Success", "Part updated successfully!");
-                closeWindow();
-            } catch (NumberFormatException e) {
-                showErrorAlert("Invalid Input", "Price must be a valid number and Stock Qty must be an integer.");
+                String after = "name=" + safe(description) +
+                        ", brand=" + safe(brand) +
+                        ", price=" + price +
+                        ", qty=" + stockQty +
+                        ", cat=" + safe(category) +
+                        ", date=" + safe(dateAddedStr);
+
+                auditService.logInventoryUpdateAsAdmin(partCode, before + " -> " + after);
             }
+
+            showSuccessAlert("Success", "Part updated successfully!");
+            closeWindow();
+        } catch (NumberFormatException e) {
+            showErrorAlert("Invalid Input", "Price must be a valid number and Stock Qty must be an integer.");
         }
     }
 
     private boolean validateInput() {
-        if (PartCode.getText().trim().isEmpty()) {
+        String partCode = PartCode.getText().trim().toUpperCase();
+        if (partCode.isEmpty()) {
             showErrorAlert("Validation Error", "Part Code is required.");
+            return false;
+        }
+        if (!ValidationUtil.isValidPartCode(partCode)) {
+            showErrorAlert("Validation Error", "Part Code must match format P followed by digits (e.g. P011).");
             return false;
         }
         if (Description.getText().trim().isEmpty()) {
@@ -198,4 +231,10 @@ public class UPDController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private String safe(String value) {
+        if (value == null) return "";
+        return value.trim();
+    }
 }
+ 
