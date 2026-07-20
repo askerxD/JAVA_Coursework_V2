@@ -1,7 +1,8 @@
 package com.example.javacw;
 
 import com.example.javacw.objects.Part;
-import com.example.javacw.parsers.InventoryParser;
+import com.example.javacw.service.AuditService;
+import com.example.javacw.service.InventoryService;
 import com.example.javacw.utils.LowStockUtil;
 import com.example.javacw.utils.SceneNavigationUtil;
 import com.example.javacw.utils.SearchUtil;
@@ -22,6 +23,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 public class HelloController implements Initializable {
+     private static final String INVENTORY_PATH = "src/main/java/com/example/javacw/data/inventory_legacy.txt";
+
      @FXML
      private Button inventoryDashboardButton;
      @FXML
@@ -61,8 +64,9 @@ public class HelloController implements Initializable {
      @FXML
      private Button resetSearch;
 
-     private ArrayList<Part> allParts;
+     private InventoryService inventoryService;
      private int currentThreshold = 4;
+     private final AuditService auditService = AuditService.getDefault();
 
      @Override
      public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -77,23 +81,27 @@ public class HelloController implements Initializable {
      }
 
      private void loadInventoryData() {
-          String filePath = "src/main/java/com/example/javacw/data/inventory_legacy.txt";
-          allParts = InventoryParser.parseInventoryFile(filePath);
-
+          inventoryService = new InventoryService(INVENTORY_PATH);
           setupTableColumns();
-          inventoryTable.getItems().addAll(allParts);
-          
-          updateInventoryStats(allParts);
-          displayLowStockWarnings(currentThreshold);
+          refreshTableFromService();
           lowStockThreshold.setText(String.valueOf(currentThreshold));
+     }
+
+     private void refreshTableFromService() {
+          ArrayList<Part> parts = inventoryService.getAllParts();
+          inventoryTable.getItems().clear();
+          inventoryTable.getItems().addAll(parts);
+          updateInventoryStats(parts);
+          displayLowStockWarnings(currentThreshold);
      }
 
      private void populateCategories() {
           Set<String> uniqueCategories = new HashSet<>();
-          for (Part part : allParts) {
+          for (Part part : inventoryService.getAllParts()) {
                uniqueCategories.add(part.getCategory());
           }
-          
+
+          catogoryFilterChoiceBox.getItems().clear();
           catogoryFilterChoiceBox.getItems().add("All Categories");
           catogoryFilterChoiceBox.getItems().addAll(uniqueCategories);
           catogoryFilterChoiceBox.setValue("All Categories");
@@ -120,40 +128,39 @@ public class HelloController implements Initializable {
      private void setupUpdateSelectedButton() {
           if (updateSelectedButton != null) {
                updateSelectedButton.setOnAction(event -> openUpdateItemWindow());
-               System.out.println("Update Selected Button handler registered successfully");
-          } else {
-               System.out.println("ERROR: updateSelectedButton is NULL - not properly injected from FXML");
           }
      }
 
      private void setupDeleteSelectedButton() {
           if (deleteSelectedButton != null) {
                deleteSelectedButton.setOnAction(event -> handleDeleteSelected());
-               System.out.println("Delete Selected Button handler registered successfully");
-          } else {
-               System.out.println("ERROR: deleteSelectedButton is NULL - not properly injected from FXML");
           }
      }
 
      private void handleDeleteSelected() {
           Part selectedPart = inventoryTable.getSelectionModel().getSelectedItem();
-           
+
           if (selectedPart == null) {
                showErrorAlert("No Selection", "Please select a part to delete.");
                return;
           }
-           
+
           Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
           confirmAlert.setTitle("Confirm Delete");
           confirmAlert.setHeaderText("Delete Part?");
-          confirmAlert.setContentText("Are you sure you want to delete '" + selectedPart.getPartCode() + " - " + selectedPart.getName() + "'? This action cannot be undone.");
-           
-          if (confirmAlert.showAndWait().get() == ButtonType.OK) {
-               allParts.remove(selectedPart);
-               inventoryTable.getItems().remove(selectedPart);
-               updateInventoryStats(allParts);
-               displayLowStockWarnings(currentThreshold);
-               showSuccessAlert("Success", "Part deleted successfully!");
+          confirmAlert.setContentText("Are you sure you want to delete '" + selectedPart.getPartCode()
+                  + " - " + selectedPart.getName() + "'? This action cannot be undone.");
+
+          if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+               String partCode = selectedPart.getPartCode();
+               if (inventoryService.deletePart(partCode)) {
+                    auditService.logInventoryDeleteAsAdmin(partCode);
+                    resetFilters();
+                    populateCategories();
+                    showSuccessAlert("Success", "Part deleted successfully!");
+               } else {
+                    showErrorAlert("Delete Failed", "Could not delete the selected part.");
+               }
           }
      }
 
@@ -185,12 +192,12 @@ public class HelloController implements Initializable {
 
      private void openUpdateItemWindow() {
           Part selectedPart = inventoryTable.getSelectionModel().getSelectedItem();
-             
+
           if (selectedPart == null) {
                showErrorAlert("No Selection", "Please select a part to update.");
                return;
           }
-             
+
           try {
                FXMLLoader loader = new FXMLLoader(getClass().getResource("updateItemScene.fxml"));
                Scene scene = new Scene(loader.load(), 600, 350);
@@ -225,22 +232,21 @@ public class HelloController implements Initializable {
           String category = catogoryFilterChoiceBox.getValue();
           String minPrice = minPriceField.getText();
           String maxPrice = maxPriceField.getText();
-          
-          // Handle "All Categories" selection
+
           if (category != null && category.equals("All Categories")) {
                category = "";
           }
-          
-          // Set default values for empty price fields
+
           if (minPrice == null || minPrice.trim().isEmpty()) {
                minPrice = "0";
           }
           if (maxPrice == null || maxPrice.trim().isEmpty()) {
                maxPrice = "999999";
           }
-          
-          ArrayList<Part> filteredParts = SearchUtil.filterParts(allParts, keyword, category, minPrice, maxPrice);
-          
+
+          ArrayList<Part> filteredParts = SearchUtil.filterParts(
+                  inventoryService.getAllParts(), keyword, category, minPrice, maxPrice);
+
           inventoryTable.getItems().clear();
           inventoryTable.getItems().addAll(filteredParts);
           updateInventoryStats(filteredParts);
@@ -251,15 +257,12 @@ public class HelloController implements Initializable {
           catogoryFilterChoiceBox.setValue("All Categories");
           minPriceField.clear();
           maxPriceField.clear();
-          
-          inventoryTable.getItems().clear();
-          inventoryTable.getItems().addAll(allParts);
-          updateInventoryStats(allParts);
+          refreshTableFromService();
      }
 
      private void updateInventoryStats(ArrayList<Part> parts) {
           partsCount.setText(String.valueOf(parts.size()));
-          
+
           double totalValue = 0.0;
           for (Part part : parts) {
                totalValue += part.getPrice() * part.getQuantity();
@@ -270,12 +273,20 @@ public class HelloController implements Initializable {
      private void setupLowStockThresholdButton() {
           lowStockThresholdSave.setOnAction(event -> {
                try {
-                    int newThreshold = Integer.parseInt(lowStockThreshold.getText());
+                    int newThreshold = Integer.parseInt(lowStockThreshold.getText().trim());
                     if (newThreshold >= 0) {
+                         int oldThreshold = currentThreshold;
                          currentThreshold = newThreshold;
                          displayLowStockWarnings(currentThreshold);
+                         if (oldThreshold != newThreshold) {
+                              auditService.logLowStockThresholdChangeAsManager(oldThreshold, newThreshold);
+                         }
+                    } else {
+                         showErrorAlert("Invalid Threshold", "Threshold must be 0 or greater.");
+                         lowStockThreshold.setText(String.valueOf(currentThreshold));
                     }
                } catch (NumberFormatException e) {
+                    showErrorAlert("Invalid Threshold", "Please enter a whole number for the threshold.");
                     lowStockThreshold.setText(String.valueOf(currentThreshold));
                }
           });
@@ -283,13 +294,14 @@ public class HelloController implements Initializable {
 
      private void displayLowStockWarnings(int threshold) {
           lowStockWarning.getChildren().clear();
-          
-          ArrayList<Part> lowStockItems = LowStockUtil.getLowStockItems(allParts, threshold);
-          
+
+          ArrayList<Part> lowStockItems = LowStockUtil.getLowStockItems(
+                  inventoryService.getAllParts(), threshold);
+
           for (Part part : lowStockItems) {
                Label warningLabel = new Label();
                String text = part.getPartCode() + " - " + part.getName() + "\n" +
-                            "remaining | " + part.getQuantity();
+                       "remaining | " + part.getQuantity();
                warningLabel.setText(text);
                warningLabel.setStyle("-fx-text-fill: #ff6b6b; -fx-font-size: 14;");
                warningLabel.setWrapText(true);
@@ -320,16 +332,29 @@ public class HelloController implements Initializable {
           lastUpdatedCol.setCellValueFactory(new PropertyValueFactory<>("dateAdded"));
      }
 
-     public void addNewPart(Part newPart) {
-          allParts.add(newPart);
-          inventoryTable.getItems().add(newPart);
-          updateInventoryStats(allParts);
-          displayLowStockWarnings(currentThreshold);
+     public boolean partCodeExists(String partCode) {
+          return inventoryService.partCodeExists(partCode);
+     }
+
+     /**
+      * @return true if the part was added and saved; false if duplicate part code
+      */
+     public boolean addNewPart(Part newPart) {
+          if (newPart == null) {
+               return false;
+          }
+          if (!inventoryService.addPart(newPart)) {
+               return false;
+          }
+          auditService.logInventoryAddAsAdmin(newPart.getPartCode(), newPart.getQuantity());
+          populateCategories();
+          resetFilters();
+          return true;
      }
 
      public void refreshInventoryTable() {
-          inventoryTable.refresh();
-          updateInventoryStats(allParts);
-          displayLowStockWarnings(currentThreshold);
+          inventoryService.persistAndResort();
+          populateCategories();
+          resetFilters();
      }
 }
