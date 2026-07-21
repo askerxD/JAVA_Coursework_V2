@@ -165,5 +165,3 @@ public class ANPController implements Initializable {
         alert.showAndWait();
     }
 }
-
- 

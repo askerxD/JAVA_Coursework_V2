@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import javax.swing.text.html.ImageView;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +33,14 @@ public class UPDController implements Initializable {
     private Button SavePart;
     @FXML
     private Button cancel;
+    @FXML
+    private Button updateImage;
+    @FXML
+    private TextField lsThreshold;
+    @FXML
+    private ImageView partImage;
+
+
 
     private HelloController parentController;
     private Part selectedPart;
@@ -130,7 +140,6 @@ public class UPDController implements Initializable {
                 return;
             }
 
-            // If part code changed, ensure the new code is not already used by another part
             if (parentController != null
                     && !partCode.equalsIgnoreCase(originalPartCode)
                     && parentController.partCodeExists(partCode)) {
@@ -191,7 +200,7 @@ public class UPDController implements Initializable {
             return false;
         }
         if (Brand.getText().trim().isEmpty()) {
-            showErrorAlert("Validation Error", "Brand is required.");
+                showErrorAlert("Validation Error", "Brand is required.");
             return false;
         }
         if (Price.getText().trim().isEmpty()) {
@@ -237,4 +246,3 @@ public class UPDController implements Initializable {
         return value.trim();
     }
 }
- 

@@ -348,11 +348,10 @@ public class HelloController implements Initializable {
                                    setText(null);
                               } else {
                                    try {
-                                        // Assuming images are in src/main/resources/com/example/javacw/
                                         Image image = new Image(getClass().getResourceAsStream("/com/example/javacw/" + item));
                                         ImageView imageView = new ImageView(image);
-                                        imageView.setFitHeight(50); // Set desired height
-                                        imageView.setFitWidth(50);  // Set desired width
+                                        imageView.setFitHeight(50);
+                                        imageView.setFitWidth(50);
                                         setGraphic(imageView);
                                         setText(null);
                                    } catch (Exception e) {
@@ -375,9 +374,6 @@ public class HelloController implements Initializable {
           return inventoryService.partCodeExists(partCode);
      }
 
-     /**
-      * @return true if the part was added and saved; false if duplicate part code
-      */
      public boolean addNewPart(Part newPart) {
           if (newPart == null) {
                return false;
