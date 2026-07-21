@@ -10,6 +10,7 @@ public class Part {
     private String category;
     private String dateAdded;
     private String image;
+    private int lowStockThreshold;
 
     // Default constructor
     public Part() {
@@ -53,6 +54,9 @@ public class Part {
     public String getImage() {
         return image;
     }
+    public int getLowStockThreshold() {
+        return lowStockThreshold;
+    }
 
     //setters
     public void setPartCode(String partCode) {
@@ -78,6 +82,9 @@ public class Part {
     }
     public void setImage(String image) {
         this.image = image;
+    }
+    public void setLowStockThreshold(int lowStockThreshold) {
+        this.lowStockThreshold = lowStockThreshold;
     }
 
     //additional method providing the stock value of a part

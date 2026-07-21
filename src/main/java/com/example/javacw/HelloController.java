@@ -13,8 +13,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -330,6 +333,42 @@ public class HelloController implements Initializable {
 
           TableColumn<Part, String> lastUpdatedCol = (TableColumn<Part, String>) inventoryTable.getColumns().get(6);
           lastUpdatedCol.setCellValueFactory(new PropertyValueFactory<>("dateAdded"));
+
+          TableColumn<Part, String> imageCol = (TableColumn<Part, String>) inventoryTable.getColumns().get(7);
+          imageCol.setCellValueFactory(new PropertyValueFactory<>("image"));
+          imageCol.setCellFactory(new Callback<TableColumn<Part, String>, TableCell<Part, String>>() {
+               @Override
+               public TableCell<Part, String> call(TableColumn<Part, String> param) {
+                    return new TableCell<Part, String>() {
+                         @Override
+                         protected void updateItem(String item, boolean empty) {
+                              super.updateItem(item, empty);
+                              if (empty || item == null || item.isEmpty()) {
+                                   setGraphic(null);
+                                   setText(null);
+                              } else {
+                                   try {
+                                        // Assuming images are in src/main/resources/com/example/javacw/
+                                        Image image = new Image(getClass().getResourceAsStream("/com/example/javacw/" + item));
+                                        ImageView imageView = new ImageView(image);
+                                        imageView.setFitHeight(50); // Set desired height
+                                        imageView.setFitWidth(50);  // Set desired width
+                                        setGraphic(imageView);
+                                        setText(null);
+                                   } catch (Exception e) {
+                                        System.err.println("Error loading image: " + item + " - " + e.getMessage());
+                                        setGraphic(null);
+                                        setText("Image Not Found");
+                                   }
+                              }
+                         }
+                    };
+               }
+          });
+
+
+          TableColumn<Part, Integer> thresholdCol = (TableColumn<Part, Integer>) inventoryTable.getColumns().get(8);
+          thresholdCol.setCellValueFactory(new PropertyValueFactory<>("lowStockThreshold"));
      }
 
      public boolean partCodeExists(String partCode) {
