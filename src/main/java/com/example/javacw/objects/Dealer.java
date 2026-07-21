@@ -15,7 +15,7 @@ public class Dealer {
         this.contactNumber = contactNumber;
         this.location = location;
     }
-    // getters and setters
+
     public String getDealerId() {
         return dealerId;
     }

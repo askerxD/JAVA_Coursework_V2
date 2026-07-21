@@ -6,9 +6,10 @@ import com.example.javacw.utils.ValidationUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-import javax.swing.text.html.ImageView;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,6 @@ public class UPDController implements Initializable {
     private TextField lsThreshold;
     @FXML
     private ImageView partImage;
-
 
 
     private HelloController parentController;
@@ -80,6 +80,24 @@ public class UPDController implements Initializable {
             Price.setText(String.valueOf(part.getPrice()));
             StockQty.setText(String.valueOf(part.getQuantity()));
             Category.setValue(ValidationUtil.normalizeCategory(part.getCategory()));
+            lsThreshold.setText(String.valueOf(part.getLowStockThreshold()));
+
+            // Populate image
+            String imageName = part.getImage();
+            if (imageName != null && !imageName.isEmpty()) {
+                try {
+                    Image image = new Image(getClass().getResourceAsStream("/com/example/javacw/" + imageName));
+                    partImage.setImage(image);
+                    partImage.setFitHeight(100);
+                    partImage.setFitWidth(100);
+                } catch (Exception e) {
+                    System.err.println("Error loading image in UPDController: " + imageName + " - " + e.getMessage());
+                    partImage.setImage(null);
+                }
+            } else {
+                partImage.setImage(null);
+            }
+
 
             try {
                 String dateStr = part.getDateAdded();
@@ -130,6 +148,7 @@ public class UPDController implements Initializable {
             String dateAddedStr = dateAdded != null
                     ? dateAdded.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     : LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            int lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
 
             if (!ValidationUtil.isNonNegativePrice(price)) {
                 showErrorAlert("Validation Error", "Price cannot be negative.");
@@ -139,6 +158,11 @@ public class UPDController implements Initializable {
                 showErrorAlert("Validation Error", "Stock quantity cannot be negative.");
                 return;
             }
+            if (lowStockThresholdValue < 0) {
+                showErrorAlert("Validation Error", "Low stock threshold cannot be negative.");
+                return;
+            }
+
 
             if (parentController != null
                     && !partCode.equalsIgnoreCase(originalPartCode)
@@ -154,7 +178,9 @@ public class UPDController implements Initializable {
                         ", price=" + selectedPart.getPrice() +
                         ", qty=" + selectedPart.getQuantity() +
                         ", cat=" + safe(selectedPart.getCategory()) +
-                        ", date=" + safe(selectedPart.getDateAdded());
+                        ", date=" + safe(selectedPart.getDateAdded()) +
+                        ", threshold=" + selectedPart.getLowStockThreshold() +
+                        ", image=" + safe(selectedPart.getImage());
 
                 selectedPart.setPartCode(partCode);
                 selectedPart.setName(description);
@@ -163,6 +189,7 @@ public class UPDController implements Initializable {
                 selectedPart.setQuantity(stockQty);
                 selectedPart.setCategory(category);
                 selectedPart.setDateAdded(dateAddedStr);
+                selectedPart.setLowStockThreshold(lowStockThresholdValue);
 
                 if (parentController != null) {
                     parentController.refreshInventoryTable();
@@ -173,7 +200,9 @@ public class UPDController implements Initializable {
                         ", price=" + price +
                         ", qty=" + stockQty +
                         ", cat=" + safe(category) +
-                        ", date=" + safe(dateAddedStr);
+                        ", date=" + safe(dateAddedStr) +
+                        ", threshold=" + lowStockThresholdValue +
+                        ", image=" + safe(selectedPart.getImage());
 
                 auditService.logInventoryUpdateAsAdmin(partCode, before + " -> " + after);
             }
@@ -181,7 +210,7 @@ public class UPDController implements Initializable {
             showSuccessAlert("Success", "Part updated successfully!");
             closeWindow();
         } catch (NumberFormatException e) {
-            showErrorAlert("Invalid Input", "Price must be a valid number and Stock Qty must be an integer.");
+            showErrorAlert("Invalid Input", "Price, Stock Qty, and Low Stock Threshold must be valid numbers.");
         }
     }
 
@@ -207,10 +236,32 @@ public class UPDController implements Initializable {
             showErrorAlert("Validation Error", "Price is required.");
             return false;
         }
+        try {
+            double price = Double.parseDouble(Price.getText().trim());
+            if (!ValidationUtil.isNonNegativePrice(price)) {
+                showErrorAlert("Validation Error", "Price cannot be negative.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showErrorAlert("Validation Error", "Price must be a valid number.");
+            return false;
+        }
+
         if (StockQty.getText().trim().isEmpty()) {
             showErrorAlert("Validation Error", "Stock Qty is required.");
             return false;
         }
+        try {
+            int stockQty = Integer.parseInt(StockQty.getText().trim());
+            if (!ValidationUtil.isNonNegativeQuantity(stockQty)) {
+                showErrorAlert("Validation Error", "Stock quantity cannot be negative.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showErrorAlert("Validation Error", "Stock Qty must be an integer.");
+            return false;
+        }
+
         if (Category.getValue() == null || Category.getValue().isEmpty()) {
             showErrorAlert("Validation Error", "Please select a category.");
             return false;
@@ -219,6 +270,23 @@ public class UPDController implements Initializable {
             showErrorAlert("Validation Error", "Last Updated date is required.");
             return false;
         }
+
+        // Validate Low Stock Threshold
+        if (lsThreshold.getText().trim().isEmpty()) {
+            showErrorAlert("Validation Error", "Low Stock Threshold is required.");
+            return false;
+        }
+        try {
+            int threshold = Integer.parseInt(lsThreshold.getText().trim());
+            if (threshold < 0) {
+                showErrorAlert("Validation Error", "Low Stock Threshold cannot be negative.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showErrorAlert("Validation Error", "Low Stock Threshold must be an integer.");
+            return false;
+        }
+
         return true;
     }
 

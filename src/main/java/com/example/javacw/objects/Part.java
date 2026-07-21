@@ -12,11 +12,9 @@ public class Part {
     private String image;
     private int lowStockThreshold;
 
-    // Default constructor
     public Part() {
     }
 
-    //constructor
     public Part(String partCode,String name,String brand,double price,int quantity,String category,String dateAdded,String image) {
 
         this.partCode = partCode;
@@ -29,7 +27,6 @@ public class Part {
         this.image = image;
     }
 
-    //getters
     public String getPartCode() {
         return partCode;
     }
@@ -58,7 +55,7 @@ public class Part {
         return lowStockThreshold;
     }
 
-    //setters
+
     public void setPartCode(String partCode) {
         this.partCode = partCode;
     }
@@ -87,7 +84,6 @@ public class Part {
         this.lowStockThreshold = lowStockThreshold;
     }
 
-    //additional method providing the stock value of a part
     public double getTotalValue() {
         return price * quantity;
     }

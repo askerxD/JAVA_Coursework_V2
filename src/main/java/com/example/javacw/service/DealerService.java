@@ -13,15 +13,12 @@ public class DealerService {
         this.filePath = filePath;
         loadDealers();
     }
-    // Load dealer data
     public void loadDealers() {
         dealers = DealerParser.parseDealerFile(filePath);
     }
-    // Get all dealers
     public ArrayList<Dealer> getAllDealers() {
         return dealers;
     }
-    // Select 4 unique random dealers, then sort by location
     public ArrayList<Dealer> getRandomFourDealers() {
 
         ArrayList<Dealer> selected = new ArrayList<>();
@@ -45,7 +42,6 @@ public class DealerService {
         SortUtil.sortDealersByLocation(selected);
         return selected;
     }
-    // Prevent duplicate dealer selection
     private boolean containsDealer(ArrayList<Dealer> list, String dealerId) {
         for (Dealer dealer : list) {
             if (dealer.getDealerId().equals(dealerId)) {

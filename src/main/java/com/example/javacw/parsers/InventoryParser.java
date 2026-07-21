@@ -6,7 +6,6 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class InventoryParser {
-    // Temporary marker so dates like "Oct 15, 2023" survive delimiter normalisation
     private static final String DATE_COMMA_MARKER = "##DATECOMMA##";
 
     public static ArrayList<Part> parseInventoryFile(String filePath) {
@@ -55,10 +54,7 @@ public class InventoryParser {
         return parts;
     }
 
-    /**
-     * Protects month-name dates that contain commas, normalises | and ; to commas,
-     * then splits. Extra fragments from a date comma are merged back if needed.
-     */
+
     private static String[] splitLegacyLine(String line) {
         String protectedLine = protectCommaDates(line);
         protectedLine = protectedLine.replace("|", ",")
@@ -70,8 +66,7 @@ public class InventoryParser {
             fields.add(raw[i].replace(DATE_COMMA_MARKER, ",").trim());
         }
 
-        // If a date comma still produced an extra field, merge date pieces at index 6+7
-        while (fields.size() > 8) {
+            while (fields.size() > 8) {
             String left = fields.get(6);
             String right = fields.get(7);
             if (isFourDigitYear(right)) {
@@ -114,7 +109,7 @@ public class InventoryParser {
                 i = found + month.length();
                 continue;
             }
-            pos++; // skip space after month
+            pos++;
 
             int dayStart = pos;
             while (pos < line.length() && Character.isDigit(line.charAt(pos))) {
@@ -125,7 +120,7 @@ public class InventoryParser {
                 i = found + month.length();
                 continue;
             }
-            pos++; // skip comma after day
+            pos++;
 
             while (pos < line.length() && line.charAt(pos) == ' ') {
                 pos++;

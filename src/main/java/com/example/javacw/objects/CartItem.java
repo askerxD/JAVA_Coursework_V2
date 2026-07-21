@@ -11,7 +11,7 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    //getters and setters
+
     public Part getPart() {
         return part;
     }
@@ -25,7 +25,6 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    // subtotal for this item (before cart-level discounts)
     public double getSubtotal() {
         return part.getPrice() * quantity;
     }

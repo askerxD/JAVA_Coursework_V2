@@ -16,13 +16,10 @@ public class InventoryService {
         this.filePath = filePath;
         loadInventory();
     }
-    // Load inventory from file
     public void loadInventory() {
         parts = InventoryParser.parseInventoryFile(filePath);
-        // Group by category and sort by part code
         SortUtil.sortPartCatCode(parts);
     }
-    // Save inventory to file
     public void saveInventory() {
         try (BufferedWriter writer =
                      new BufferedWriter(new FileWriter(filePath))) {
@@ -35,18 +32,15 @@ public class InventoryService {
                     + e.getMessage());
         }
     }
-    // Add part
     public boolean addPart(Part part) {
         if (getPartByCode(part.getPartCode()) != null) {
             return false;
         }
         parts.add(part);
-        // Re-sort after modification
         SortUtil.sortPartCatCode(parts);
         saveInventory();
         return true;
     }
-    // Update part
     public boolean updatePart(String code, Part updatedPart) {
         for (int i = 0; i < parts.size(); i++) {
             if (parts.get(i).getPartCode().equalsIgnoreCase(code)) {
@@ -59,7 +53,6 @@ public class InventoryService {
         }
         return false;
     }
-    // Delete part
     public boolean deletePart(String code) {
         for (int i = 0; i < parts.size(); i++) {
             if (parts.get(i).getPartCode().equalsIgnoreCase(code)) {
@@ -71,7 +64,6 @@ public class InventoryService {
         return false;
     }
 
-    // Persist in-place edits (e.g. after fields of an existing Part object are changed)
     public void persistAndResort() {
         SortUtil.sortPartCatCode(parts);
         saveInventory();
@@ -80,11 +72,9 @@ public class InventoryService {
     public boolean partCodeExists(String code) {
         return getPartByCode(code) != null;
     }
-    // Get all parts
     public ArrayList<Part> getAllParts() {
         return parts;
     }
-    // Find by part code
     public Part getPartByCode(String code) {
         for (Part part : parts) {
             if (part.getPartCode().equalsIgnoreCase(code)) {
@@ -93,7 +83,6 @@ public class InventoryService {
         }
         return null;
     }
-    // Low stock monitoring
     public ArrayList<Part> getLowStockItems(int threshold) {
         ArrayList<Part> lowStock = new ArrayList<>();
         for (Part part : parts) {
@@ -103,7 +92,6 @@ public class InventoryService {
         }
         return lowStock;
     }
-    // Total inventory value
     public double getTotalInventoryValue() {
         double total = 0;
         for (Part part : parts) {
@@ -111,7 +99,6 @@ public class InventoryService {
         }
         return total;
     }
-    // Total quantity of all items
     public int getTotalItemCount() {
         int total = 0;
         for (Part part : parts) {
@@ -119,7 +106,6 @@ public class InventoryService {
         }
         return total;
     }
-    // Reduce stock after checkout
     public boolean reduceStock(String partCode, int quantitySold) {
         Part part = getPartByCode(partCode);
         if (part == null) {

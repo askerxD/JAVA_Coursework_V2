@@ -5,7 +5,6 @@ import com.example.javacw.objects.Part;
 import java.util.ArrayList;
 
 public class SortUtil {
-    // Dealer sorting by location
     public static void sortDealersByLocation(ArrayList<Dealer> dealers) {
 
         for (int i = 0; i < dealers.size() - 1; i++) {
@@ -28,7 +27,6 @@ public class SortUtil {
         }
     }
 
-    // Inventory sorting
     public static void sortPartCatCode(ArrayList<Part> parts) {
         for (int i = 0; i < parts.size() - 1; i++) {
 
@@ -41,11 +39,9 @@ public class SortUtil {
                 String nextCategory =
                         next.getCategory().toUpperCase();
                 boolean swap = false;
-                // Primary sort: Category
                 if (currentCategory.compareTo(nextCategory) > 0) {
                     swap = true;
                 }
-                // Secondary sort: Part Code
                 else if (currentCategory.equals(nextCategory)) {
 
                     if (current.getPartCode()

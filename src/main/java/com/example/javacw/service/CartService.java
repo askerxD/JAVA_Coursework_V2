@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class CartService {
     private ArrayList<CartItem> cart = new ArrayList<>();
-    // Add item to cart
     public boolean addToCart(Part part, int quantity) {
         if (quantity <= 0) return false;
         if (part == null) return false;
@@ -14,7 +13,6 @@ public class CartService {
         int available = getAvailableQuantity(part);
         if (quantity > available) return false;
 
-        // check if already exists
         for (CartItem item : cart) {
             if (item.getPart().getPartCode().equals(part.getPartCode())) {
                 item.setQuantity(item.getQuantity() + quantity);
@@ -40,7 +38,6 @@ public class CartService {
         }
         return part.getQuantity() - getQuantityInCart(part.getPartCode());
     }
-    // Remove item from cart
     public void removeFromCart(String partCode) {
         for (int i = 0; i < cart.size(); i++) {
             if (cart.get(i).getPart().getPartCode().equals(partCode)) {
@@ -50,7 +47,6 @@ public class CartService {
         }
     }
 
-    // Remove a quantity from a cart item
     public boolean removeQuantityFromCart(String partCode, int quantity) {
         if (quantity <= 0) {
             return false;
@@ -72,11 +68,9 @@ public class CartService {
         }
         return false;
     }
-    // Get cart items
     public ArrayList<CartItem> getCartItems() {
         return cart;
     }
-    // Clear cart
     public void clearCart() {
         cart.clear();
     }
@@ -108,7 +102,6 @@ public class CartService {
         return getTotalAfterBulkDiscount() - calculateTotal();
     }
 
-    // Calculate total with discounts
     public double calculateTotal() {
         double total = getTotalAfterBulkDiscount();
         if (hasEngineAndElectrical()) {

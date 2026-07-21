@@ -14,7 +14,6 @@ public class SearchUtil {
           String categoryUpper = category != null && !category.isEmpty() ? category.toUpperCase() : null;
 
           for (Part part : parts) {
-               // Keyword search - search in part code, name, and brand
                if (!keywordLower.isEmpty()) {
                     if (!part.getPartCode().toLowerCase().contains(keywordLower) &&
                             !part.getName().toLowerCase().contains(keywordLower) &&
@@ -23,13 +22,11 @@ public class SearchUtil {
                     }
                }
 
-               // Category filter
                if (categoryUpper != null
                        && !part.getCategory().toUpperCase().equals(categoryUpper)) {
                     continue;
                }
 
-               // Price range filter
                if (part.getPrice() < minPriceValue || part.getPrice() > maxPriceValue) {
                     continue;
                }

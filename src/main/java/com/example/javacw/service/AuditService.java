@@ -91,15 +91,12 @@ public class AuditService {
             return null;
         }
 
-        // Keep trailing empty fields (Java split() drops them by default)
         String[] parts = trimmed.split("\\s*\\|\\s*", -1);
 
-        // New format: timestamp | role | action | entity | details
         if (parts.length >= 5) {
             return new AuditLogEntry(parts[0], parts[1], parts[2], parts[3], joinFrom(parts, 4));
         }
 
-        // Legacy format: timestamp | action | partCode | quantity
         if (parts.length == 4) {
             String timestamp = parts[0];
             String action = parts[1];
