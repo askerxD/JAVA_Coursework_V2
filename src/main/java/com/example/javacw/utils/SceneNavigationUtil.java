@@ -37,7 +37,7 @@ public class SceneNavigationUtil {
     public static void switchToScene(Button sourceButton, String fxmlFileName, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource(fxmlFileName));
-            Scene scene = new Scene(loader.load(), 1153, 627);
+            Scene scene = new Scene(loader.load(), 1337, 725);
 
             Stage stage = (Stage) sourceButton.getScene().getWindow();
             stage.getIcons().clear();
