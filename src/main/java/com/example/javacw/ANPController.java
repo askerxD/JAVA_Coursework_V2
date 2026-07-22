@@ -91,6 +91,12 @@ public class ANPController implements Initializable {
                     : LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             String imageName = image.getText().trim();
 
+            // Get low stock threshold, default to 5 if empty
+            int lowStockThresholdValue = 5; // Default value
+            if (!lsThreshold.getText().trim().isEmpty()) {
+                lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
+            }
+
             if (!ValidationUtil.isNonNegativePrice(price)) {
                 showErrorAlert("Validation Error", "Price cannot be negative.");
                 return;
@@ -99,13 +105,19 @@ public class ANPController implements Initializable {
                 showErrorAlert("Validation Error", "Stock quantity cannot be negative.");
                 return;
             }
+            // Add validation for lowStockThresholdValue
+            if (lowStockThresholdValue < 0) {
+                showErrorAlert("Validation Error", "Low stock threshold cannot be negative.");
+                return;
+            }
+
             if (parentController != null && parentController.partCodeExists(partCode)) {
                 showErrorAlert("Duplicate Part Code",
                         "Part code '" + partCode + "' already exists. Please use a unique code.");
                 return;
             }
 
-            Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, imageName);
+            Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, imageName, lowStockThresholdValue);
 
             if (parentController != null) {
                 if (!parentController.addNewPart(newPart)) {
@@ -118,7 +130,7 @@ public class ANPController implements Initializable {
             showSuccessAlert("Success", "Part added successfully!");
             closeWindow();
         } catch (NumberFormatException e) {
-            showErrorAlert("Invalid Input", "Price must be a valid number and Stock Qty must be an integer.");
+            showErrorAlert("Invalid Input", "Price, Stock Qty, and Low Stock Threshold must be valid numbers.");
         }
     }
 
@@ -155,6 +167,20 @@ public class ANPController implements Initializable {
         if (LastUpdated.getValue() == null) {
             showErrorAlert("Validation Error", "Last Updated date is required.");
             return false;
+        }
+
+        // Validate Low Stock Threshold
+        if (!lsThreshold.getText().trim().isEmpty()) { // Only validate if not empty, as empty means default 5
+            try {
+                int threshold = Integer.parseInt(lsThreshold.getText().trim());
+                if (threshold < 0) {
+                    showErrorAlert("Validation Error", "Low Stock Threshold cannot be negative.");
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                showErrorAlert("Validation Error", "Low Stock Threshold must be an integer.");
+                return false;
+            }
         }
         return true;
     }

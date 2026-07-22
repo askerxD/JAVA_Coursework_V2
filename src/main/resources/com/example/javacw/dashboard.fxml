@@ -62,8 +62,5 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="1182.0" layoutY="565.0" text="Low stock Threshold" />
-      <TextField fx:id="lowStockThreshold" layoutX="1182.0" layoutY="583.0" prefHeight="25.0" prefWidth="76.0" />
-      <Button fx:id="lowStockThresholdSave" layoutX="1268.0" layoutY="583.0" mnemonicParsing="false" text="Save" />
    </children>
 </Pane>

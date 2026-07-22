@@ -3,7 +3,6 @@ package com.example.javacw;
 import com.example.javacw.objects.Part;
 import com.example.javacw.service.AuditService;
 import com.example.javacw.service.InventoryService;
-import com.example.javacw.utils.LowStockUtil;
 import com.example.javacw.utils.SceneNavigationUtil;
 import com.example.javacw.utils.SearchUtil;
 import javafx.fxml.FXML;
@@ -42,16 +41,14 @@ public class HelloController implements Initializable {
      private Button updateSelectedButton;
      @FXML
      private Button deleteSelectedButton;
-     @FXML
-     private Button lowStockThresholdSave;
+     // Removed @FXML for lowStockThresholdSave
+     // Removed @FXML for lowStockThreshold
      @FXML
      private TextField keyworkSearchField;
      @FXML
      private TextField minPriceField;
      @FXML
      private TextField maxPriceField;
-     @FXML
-     private TextField lowStockThreshold;
      @FXML
      private TableView<Part> inventoryTable;
      @FXML
@@ -68,13 +65,13 @@ public class HelloController implements Initializable {
      private Button resetSearch;
 
      private InventoryService inventoryService;
-     private int currentThreshold = 4;
+     // Removed private int currentThreshold = 4;
      private final AuditService auditService = AuditService.getDefault();
 
      @Override
      public void initialize(URL url, ResourceBundle resourceBundle) {
           loadInventoryData();
-          setupLowStockThresholdButton();
+          // Removed setupLowStockThresholdButton();
           setupSearchButtons();
           setupAddNewPartButton();
           setupUpdateSelectedButton();
@@ -87,7 +84,7 @@ public class HelloController implements Initializable {
           inventoryService = new InventoryService(INVENTORY_PATH);
           setupTableColumns();
           refreshTableFromService();
-          lowStockThreshold.setText(String.valueOf(currentThreshold));
+          // Removed lowStockThreshold.setText(String.valueOf(currentThreshold));
      }
 
      private void refreshTableFromService() {
@@ -95,7 +92,7 @@ public class HelloController implements Initializable {
           inventoryTable.getItems().clear();
           inventoryTable.getItems().addAll(parts);
           updateInventoryStats(parts);
-          displayLowStockWarnings(currentThreshold);
+          displayLowStockWarnings(); // Call without threshold
      }
 
      private void populateCategories() {
@@ -273,42 +270,24 @@ public class HelloController implements Initializable {
           totalnventoryValue.setText(String.format("Rs. %.2f", totalValue));
      }
 
-     private void setupLowStockThresholdButton() {
-          lowStockThresholdSave.setOnAction(event -> {
-               try {
-                    int newThreshold = Integer.parseInt(lowStockThreshold.getText().trim());
-                    if (newThreshold >= 0) {
-                         int oldThreshold = currentThreshold;
-                         currentThreshold = newThreshold;
-                         displayLowStockWarnings(currentThreshold);
-                         if (oldThreshold != newThreshold) {
-                              auditService.logLowStockThresholdChangeAsManager(oldThreshold, newThreshold);
-                         }
-                    } else {
-                         showErrorAlert("Invalid Threshold", "Threshold must be 0 or greater.");
-                         lowStockThreshold.setText(String.valueOf(currentThreshold));
-                    }
-               } catch (NumberFormatException e) {
-                    showErrorAlert("Invalid Threshold", "Please enter a whole number for the threshold.");
-                    lowStockThreshold.setText(String.valueOf(currentThreshold));
-               }
-          });
-     }
+     // Removed setupLowStockThresholdButton()
 
-     private void displayLowStockWarnings(int threshold) {
+     private void displayLowStockWarnings() { // Removed threshold parameter
           lowStockWarning.getChildren().clear();
 
-          ArrayList<Part> lowStockItems = LowStockUtil.getLowStockItems(
-                  inventoryService.getAllParts(), threshold);
+          ArrayList<Part> allParts = inventoryService.getAllParts(); // Get all parts
 
-          for (Part part : lowStockItems) {
-               Label warningLabel = new Label();
-               String text = part.getPartCode() + " - " + part.getName() + "\n" +
-                       "remaining | " + part.getQuantity();
-               warningLabel.setText(text);
-               warningLabel.setStyle("-fx-text-fill: #ff6b6b; -fx-font-size: 14;");
-               warningLabel.setWrapText(true);
-               lowStockWarning.getChildren().add(warningLabel);
+          for (Part part : allParts) {
+               // Check against individual lowStockThreshold
+               if (part.getQuantity() < part.getLowStockThreshold()) {
+                    Label warningLabel = new Label();
+                    String text = part.getPartCode() + " - " + part.getName() + "\n" +
+                            "remaining | " + part.getQuantity() + " (Threshold: " + part.getLowStockThreshold() + ")";
+                    warningLabel.setText(text);
+                    warningLabel.setStyle("-fx-text-fill: #ff6b6b; -fx-font-size: 14;");
+                    warningLabel.setWrapText(true);
+                    lowStockWarning.getChildren().add(warningLabel);
+               }
           }
      }
 
@@ -391,5 +370,6 @@ public class HelloController implements Initializable {
           inventoryService.persistAndResort();
           populateCategories();
           resetFilters();
+          displayLowStockWarnings(); // Ensure warnings are refreshed after table update
      }
 }

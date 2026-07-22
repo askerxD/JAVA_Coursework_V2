@@ -25,6 +25,13 @@ public class Part {
         this.category = category;
         this.dateAdded = dateAdded;
         this.image = image;
+        this.lowStockThreshold = 5; // Default to 5 if not specified
+    }
+
+    // New constructor including lowStockThreshold
+    public Part(String partCode, String name, String brand, double price, int quantity, String category, String dateAdded, String image, int lowStockThreshold) {
+        this(partCode, name, brand, price, quantity, category, dateAdded, image); // Call existing constructor
+        this.lowStockThreshold = lowStockThreshold;
     }
 
     public String getPartCode() {
@@ -90,6 +97,6 @@ public class Part {
 
     @Override
     public String toString() {
-        return partCode + "," + name + "," + brand + "," + price + "," + quantity + "," + category + "," + dateAdded + "," + image;
+        return partCode + "," + name + "," + brand + "," + price + "," + quantity + "," + category + "," + dateAdded + "," + image + "," + lowStockThreshold;
     }
 }

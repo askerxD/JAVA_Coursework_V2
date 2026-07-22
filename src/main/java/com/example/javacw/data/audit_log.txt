@@ -1,3 +1,8 @@
 2026-07-14 08:36:19 | MANAGER | LOW_STOCK_THRESHOLD_CHANGE | INVENTORY | old=4, new=100
 2026-07-15 08:55:42 | CASHIER | SALE | POS | partCode=P005, quantitySold=3
 2026-07-20 14:23:04 | MANAGER | LOW_STOCK_THRESHOLD_CHANGE | INVENTORY | old=4, new=12
+2026-07-22 11:30:13 | MANAGER | LOW_STOCK_THRESHOLD_CHANGE | INVENTORY | old=4, new=10
+2026-07-22 11:30:26 | MANAGER | LOW_STOCK_THRESHOLD_CHANGE | INVENTORY | old=10, new=0
+2026-07-22 11:30:41 | ADMIN | UPDATE | P002 | name=TVS King Brake Pad, brand=TVS, price=1250.0, qty=8, cat=BRAKES, date=12/05/2023, threshold=5, image=brakepad.png -> name=TVS King Brake Pad, brand=TVS, price=1250.0, qty=8, cat=BRAKES, date=12/05/2023, threshold=10, image=brakepad.png
+2026-07-22 12:00:30 | ADMIN | UPDATE | P002 | name=TVS King Brake Pad, brand=TVS, price=1250.0, qty=8, cat=BRAKES, date=12/05/2023, threshold=5, image=brakepad.png -> name=TVS King Brake Pad, brand=TVS, price=1250.0, qty=8, cat=BRAKES, date=12/05/2023, threshold=10, image=brakepad.png
+2026-07-22 12:01:00 | ADMIN | UPDATE | P002 | name=TVS King Brake Pad, brand=TVS, price=1250.0, qty=8, cat=BRAKES, date=12/05/2023, threshold=10, image=brakepad.png -> name=TVS King Brake Pad, brand=TVS, price=1250.0, qty=8, cat=BRAKES, date=12/05/2023, threshold=5, image=brakepad.png
