@@ -15,6 +15,7 @@ public class HelloApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("dashboard.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1337, 725);
         stage.setTitle("Malambe spare depot");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
