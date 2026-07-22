@@ -38,7 +38,7 @@ public class ANPController implements Initializable {
     @FXML
     private Button addImage;
     @FXML
-    private ImageView partImage; // Added ImageView
+    private ImageView partImage;
 
 
     private HelloController parentController;
@@ -51,7 +51,6 @@ public class ANPController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupCategoryDropdown();
         setupButtonHandlers();
-        // Add listener to image TextField to update ImageView dynamically
         image.textProperty().addListener((observable, oldValue, newValue) -> updateImageView(newValue));
     }
 
@@ -90,7 +89,7 @@ public class ANPController implements Initializable {
             String dateAddedStr = dateAdded != null
                     ? dateAdded.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     : LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            String imageName = image.getText().trim(); // Get image name from TextField
+            String imageName = image.getText().trim();
 
             if (!ValidationUtil.isNonNegativePrice(price)) {
                 showErrorAlert("Validation Error", "Price cannot be negative.");
@@ -179,21 +178,19 @@ public class ANPController implements Initializable {
         alert.showAndWait();
     }
 
-    // New method to update the ImageView based on the provided image name
     private void updateImageView(String imageName) {
         if (imageName != null && !imageName.isEmpty()) {
             try {
-                // The path for resources seems to be /com/example/javacw/ based on HelloController
                 Image img = new Image(getClass().getResourceAsStream("/com/example/javacw/" + imageName));
                 partImage.setImage(img);
                 partImage.setFitHeight(100);
                 partImage.setFitWidth(100);
             } catch (Exception e) {
                 System.err.println("Error loading image in ANPController: " + imageName + " - " + e.getMessage());
-                partImage.setImage(null); // Clear image if not found
+                partImage.setImage(null);
             }
         } else {
-            partImage.setImage(null); // Clear image if name is empty
+            partImage.setImage(null);
         }
     }
 }
