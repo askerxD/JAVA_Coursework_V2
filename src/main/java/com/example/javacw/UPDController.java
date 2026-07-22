@@ -35,11 +35,13 @@ public class UPDController implements Initializable {
     @FXML
     private Button cancel;
     @FXML
-    private Button updateImage;
+    private Button updateImage; // This button is not used in the current logic, but kept for FXML consistency
     @FXML
     private TextField lsThreshold;
     @FXML
     private ImageView partImage;
+    @FXML
+    private TextField image;
 
 
     private HelloController parentController;
@@ -61,6 +63,8 @@ public class UPDController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupCategoryDropdown();
         setupButtonHandlers();
+        // Add listener to image TextField to update ImageView dynamically
+        image.textProperty().addListener((observable, oldValue, newValue) -> updateImageView(newValue));
     }
 
     private void setupCategoryDropdown() {
@@ -82,21 +86,10 @@ public class UPDController implements Initializable {
             Category.setValue(ValidationUtil.normalizeCategory(part.getCategory()));
             lsThreshold.setText(String.valueOf(part.getLowStockThreshold()));
 
-            // Populate image
-            String imageName = part.getImage();
-            if (imageName != null && !imageName.isEmpty()) {
-                try {
-                    Image image = new Image(getClass().getResourceAsStream("/com/example/javacw/" + imageName));
-                    partImage.setImage(image);
-                    partImage.setFitHeight(100);
-                    partImage.setFitWidth(100);
-                } catch (Exception e) {
-                    System.err.println("Error loading image in UPDController: " + imageName + " - " + e.getMessage());
-                    partImage.setImage(null);
-                }
-            } else {
-                partImage.setImage(null);
-            }
+            // Populate image TextField
+            image.setText(part.getImage());
+            // Display the image based on the current part's image name
+            updateImageView(part.getImage());
 
 
             try {
@@ -149,6 +142,7 @@ public class UPDController implements Initializable {
                     ? dateAdded.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     : LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             int lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
+            String imageName = image.getText().trim(); // Get image name from TextField
 
             if (!ValidationUtil.isNonNegativePrice(price)) {
                 showErrorAlert("Validation Error", "Price cannot be negative.");
@@ -190,6 +184,7 @@ public class UPDController implements Initializable {
                 selectedPart.setCategory(category);
                 selectedPart.setDateAdded(dateAddedStr);
                 selectedPart.setLowStockThreshold(lowStockThresholdValue);
+                selectedPart.setImage(imageName); // Set the new image name
 
                 if (parentController != null) {
                     parentController.refreshInventoryTable();
@@ -202,7 +197,7 @@ public class UPDController implements Initializable {
                         ", cat=" + safe(category) +
                         ", date=" + safe(dateAddedStr) +
                         ", threshold=" + lowStockThresholdValue +
-                        ", image=" + safe(selectedPart.getImage());
+                        ", image=" + safe(selectedPart.getImage()); // Use updated image name here
 
                 auditService.logInventoryUpdateAsAdmin(partCode, before + " -> " + after);
             }
@@ -307,6 +302,24 @@ public class UPDController implements Initializable {
         alert.setTitle(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // New method to update the ImageView based on the provided image name
+    private void updateImageView(String imageName) {
+        if (imageName != null && !imageName.isEmpty()) {
+            try {
+                // The path for resources seems to be /com/example/javacw/ based on HelloController
+                Image img = new Image(getClass().getResourceAsStream("/com/example/javacw/" + imageName));
+                partImage.setImage(img);
+                partImage.setFitHeight(100);
+                partImage.setFitWidth(100);
+            } catch (Exception e) {
+                System.err.println("Error loading image in UPDController: " + imageName + " - " + e.getMessage());
+                partImage.setImage(null); // Clear image if not found
+            }
+        } else {
+            partImage.setImage(null); // Clear image if name is empty
+        }
     }
 
     private String safe(String value) {

@@ -5,6 +5,8 @@ import com.example.javacw.utils.ValidationUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import java.net.URL;
 import java.time.LocalDate;
@@ -29,6 +31,15 @@ public class ANPController implements Initializable {
     private Button SavePart;
     @FXML
     private Button cancel;
+    @FXML
+    private TextField lsThreshold;
+    @FXML
+    private TextField image;
+    @FXML
+    private Button addImage;
+    @FXML
+    private ImageView partImage; // Added ImageView
+
 
     private HelloController parentController;
 
@@ -40,6 +51,8 @@ public class ANPController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setupCategoryDropdown();
         setupButtonHandlers();
+        // Add listener to image TextField to update ImageView dynamically
+        image.textProperty().addListener((observable, oldValue, newValue) -> updateImageView(newValue));
     }
 
     private void setupCategoryDropdown() {
@@ -77,6 +90,7 @@ public class ANPController implements Initializable {
             String dateAddedStr = dateAdded != null
                     ? dateAdded.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     : LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            String imageName = image.getText().trim(); // Get image name from TextField
 
             if (!ValidationUtil.isNonNegativePrice(price)) {
                 showErrorAlert("Validation Error", "Price cannot be negative.");
@@ -92,7 +106,7 @@ public class ANPController implements Initializable {
                 return;
             }
 
-            Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, "");
+            Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, imageName);
 
             if (parentController != null) {
                 if (!parentController.addNewPart(newPart)) {
@@ -163,5 +177,23 @@ public class ANPController implements Initializable {
         alert.setTitle(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // New method to update the ImageView based on the provided image name
+    private void updateImageView(String imageName) {
+        if (imageName != null && !imageName.isEmpty()) {
+            try {
+                // The path for resources seems to be /com/example/javacw/ based on HelloController
+                Image img = new Image(getClass().getResourceAsStream("/com/example/javacw/" + imageName));
+                partImage.setImage(img);
+                partImage.setFitHeight(100);
+                partImage.setFitWidth(100);
+            } catch (Exception e) {
+                System.err.println("Error loading image in ANPController: " + imageName + " - " + e.getMessage());
+                partImage.setImage(null); // Clear image if not found
+            }
+        } else {
+            partImage.setImage(null); // Clear image if name is empty
+        }
     }
 }

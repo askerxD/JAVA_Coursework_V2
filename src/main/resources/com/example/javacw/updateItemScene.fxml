@@ -29,9 +29,9 @@
       <Label layoutX="320.0" layoutY="241.0" text="Low Stock threshold" />
       <TextField fx:id="lsThreshold" layoutX="320.0" layoutY="265.0" prefHeight="25.0" prefWidth="107.0" />
       <Button fx:id="updateImage" layoutX="487.0" layoutY="311.0" mnemonicParsing="false" text="Update Image" />
-      <ImageView fx:id="partImage" fitHeight="176.0" fitWidth="200.0" layoutX="606.0" layoutY="67.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="partImage" fitHeight="176.0" fitWidth="200.0" layoutX="622.0" layoutY="67.0" pickOnBounds="true" preserveRatio="true" />
       <Label layoutX="606.0" layoutY="27.0" text="Image" />
       <Label layoutX="470.0" layoutY="241.0" text="Image" />
-      <TextField fx:id="lsThreshold1" layoutX="470.0" layoutY="265.0" prefHeight="25.0" prefWidth="107.0" />
+      <TextField fx:id="image" layoutX="470.0" layoutY="265.0" prefHeight="25.0" prefWidth="107.0" />
    </children>
 </Pane>
