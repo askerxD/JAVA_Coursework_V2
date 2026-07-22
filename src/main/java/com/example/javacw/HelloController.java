@@ -174,7 +174,8 @@ public class HelloController implements Initializable {
      private void openAddItemWindow() {
           try {
                FXMLLoader loader = new FXMLLoader(getClass().getResource("addItemScene.fxml"));
-               Scene scene = new Scene(loader.load(), 600, 400);
+               // Corrected dimensions for addItemScene.fxml
+               Scene scene = new Scene(loader.load(), 748, 350);
 
                ANPController controller = loader.getController();
                controller.setParentController(this);
@@ -200,7 +201,8 @@ public class HelloController implements Initializable {
 
           try {
                FXMLLoader loader = new FXMLLoader(getClass().getResource("updateItemScene.fxml"));
-               Scene scene = new Scene(loader.load(), 600, 350);
+               // Corrected dimensions for updateItemScene.fxml
+               Scene scene = new Scene(loader.load(), 838, 350);
 
                UPDController controller = loader.getController();
                controller.setParentController(this);
