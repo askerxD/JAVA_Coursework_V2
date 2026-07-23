@@ -1,7 +1,8 @@
 package com.example.javacw;
 
 import com.example.javacw.objects.Part;
-import com.example.javacw.utils.ValidationUtil;
+import com.example.javacw.service.PartService; // Import PartService
+import com.example.javacw.utils.ValidationUtil; // Keep for normalizeCategory if still used
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -10,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 public class ANPController implements Initializable {
@@ -41,10 +43,10 @@ public class ANPController implements Initializable {
     private ImageView partImage;
 
 
-    private HelloController parentController;
+    private PartService partService; // Use PartService
 
-    public void setParentController(HelloController controller) {
-        this.parentController = controller;
+    public void setPartService(PartService partService) { // Update setter
+        this.partService = partService;
     }
 
     @Override
@@ -75,20 +77,14 @@ public class ANPController implements Initializable {
     }
 
     private void handleSavePart() {
-        if (!validateInput()) {
-            return;
-        }
         try {
             String partCode = PartCode.getText().trim().toUpperCase();
             String description = Description.getText().trim();
             String brand = Brand.getText().trim();
             double price = Double.parseDouble(Price.getText().trim());
             int stockQty = Integer.parseInt(StockQty.getText().trim());
-            String category = ValidationUtil.normalizeCategory(Category.getValue());
+            String category = Category.getValue(); // Get raw category
             LocalDate dateAdded = LastUpdated.getValue();
-            String dateAddedStr = dateAdded != null
-                    ? dateAdded.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                    : LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             String imageName = image.getText().trim();
 
             // Get low stock threshold, default to 5 if empty
@@ -97,92 +93,27 @@ public class ANPController implements Initializable {
                 lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
             }
 
-            if (!ValidationUtil.isNonNegativePrice(price)) {
-                showErrorAlert("Validation Error", "Price cannot be negative.");
-                return;
-            }
-            if (!ValidationUtil.isNonNegativeQuantity(stockQty)) {
-                showErrorAlert("Validation Error", "Stock quantity cannot be negative.");
-                return;
-            }
-            // Add validation for lowStockThresholdValue
-            if (lowStockThresholdValue < 0) {
-                showErrorAlert("Validation Error", "Low stock threshold cannot be negative.");
-                return;
-            }
+            // Use PartService for validation
+            partService.validatePartData(partCode, description, brand, price, stockQty, category, dateAdded, imageName, lowStockThresholdValue);
 
-            if (parentController != null && parentController.partCodeExists(partCode)) {
-                showErrorAlert("Duplicate Part Code",
-                        "Part code '" + partCode + "' already exists. Please use a unique code.");
-                return;
-            }
+            // Normalize category before creating Part object
+            String normalizedCategory = ValidationUtil.normalizeCategory(category);
+            String dateAddedStr = dateAdded != null
+                    ? dateAdded.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                    : LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
-            Part newPart = new Part(partCode, description, brand, price, stockQty, category, dateAddedStr, imageName, lowStockThresholdValue);
+            Part newPart = new Part(partCode, description, brand, price, stockQty, normalizedCategory, dateAddedStr, imageName, lowStockThresholdValue);
 
-            if (parentController != null) {
-                if (!parentController.addNewPart(newPart)) {
-                    showErrorAlert("Duplicate Part Code",
-                            "Part code '" + partCode + "' already exists. Please use a unique code.");
-                    return;
-                }
-            }
+            // Use PartService to add the part
+            partService.addPart(newPart);
 
             showSuccessAlert("Success", "Part added successfully!");
             closeWindow();
         } catch (NumberFormatException e) {
             showErrorAlert("Invalid Input", "Price, Stock Qty, and Low Stock Threshold must be valid numbers.");
+        } catch (IllegalArgumentException e) {
+            showErrorAlert("Validation Error", e.getMessage());
         }
-    }
-
-    private boolean validateInput() {
-        String partCode = PartCode.getText().trim().toUpperCase();
-        if (partCode.isEmpty()) {
-            showErrorAlert("Validation Error", "Part Code is required.");
-            return false;
-        }
-        if (!ValidationUtil.isValidPartCode(partCode)) {
-            showErrorAlert("Validation Error", "Part Code must match format P followed by digits (e.g. P011).");
-            return false;
-        }
-        if (Description.getText().trim().isEmpty()) {
-            showErrorAlert("Validation Error", "Description is required.");
-            return false;
-        }
-        if (Brand.getText().trim().isEmpty()) {
-            showErrorAlert("Validation Error", "Brand is required.");
-            return false;
-        }
-        if (Price.getText().trim().isEmpty()) {
-            showErrorAlert("Validation Error", "Price is required.");
-            return false;
-        }
-        if (StockQty.getText().trim().isEmpty()) {
-            showErrorAlert("Validation Error", "Stock Qty is required.");
-            return false;
-        }
-        if (Category.getValue() == null || Category.getValue().isEmpty()) {
-            showErrorAlert("Validation Error", "Please select a category.");
-            return false;
-        }
-        if (LastUpdated.getValue() == null) {
-            showErrorAlert("Validation Error", "Last Updated date is required.");
-            return false;
-        }
-
-        // Validate Low Stock Threshold
-        if (!lsThreshold.getText().trim().isEmpty()) { // Only validate if not empty, as empty means default 5
-            try {
-                int threshold = Integer.parseInt(lsThreshold.getText().trim());
-                if (threshold < 0) {
-                    showErrorAlert("Validation Error", "Low Stock Threshold cannot be negative.");
-                    return false;
-                }
-            } catch (NumberFormatException e) {
-                showErrorAlert("Validation Error", "Low Stock Threshold must be an integer.");
-                return false;
-            }
-        }
-        return true;
     }
 
     private void closeWindow() {

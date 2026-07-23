@@ -3,6 +3,7 @@ package com.example.javacw;
 import com.example.javacw.objects.Part;
 import com.example.javacw.service.AuditService;
 import com.example.javacw.service.InventoryService;
+import com.example.javacw.service.PartService; // Import PartService
 import com.example.javacw.utils.SceneNavigationUtil;
 import com.example.javacw.utils.SearchUtil;
 import javafx.fxml.FXML;
@@ -155,8 +156,7 @@ public class HelloController implements Initializable {
                String partCode = selectedPart.getPartCode();
                if (inventoryService.deletePart(partCode)) {
                     auditService.logInventoryDeleteAsAdmin(partCode);
-                    resetFilters();
-                    populateCategories();
+                    refreshInventoryTable(); // Call refreshInventoryTable instead of resetFilters and populateCategories
                     showSuccessAlert("Success", "Part deleted successfully!");
                } else {
                     showErrorAlert("Delete Failed", "Could not delete the selected part.");
@@ -178,13 +178,15 @@ public class HelloController implements Initializable {
                Scene scene = new Scene(loader.load(), 748, 350);
 
                ANPController controller = loader.getController();
-               controller.setParentController(this);
+               PartService partService = new PartService(inventoryService); // Create PartService
+               controller.setPartService(partService); // Pass PartService
 
                Stage stage = new Stage();
                stage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
                stage.setTitle("Add New Part");
                stage.setScene(scene);
-               stage.show();
+               stage.showAndWait(); // Use showAndWait to ensure the table is refreshed after the window is closed
+               refreshInventoryTable(); // Refresh table after adding a part
           } catch (IOException e) {
                e.printStackTrace();
                showErrorAlert("Error", "Failed to open Add Item window");
@@ -205,14 +207,16 @@ public class HelloController implements Initializable {
                Scene scene = new Scene(loader.load(), 838, 350);
 
                UPDController controller = loader.getController();
-               controller.setParentController(this);
+               PartService partService = new PartService(inventoryService); // Create PartService
+               controller.setPartService(partService); // Pass PartService
                controller.setPart(selectedPart);
 
                Stage stage = new Stage();
                stage.getIcons().add(new Image(getClass().getResourceAsStream("logo.png")));
                stage.setTitle("Update Part");
                stage.setScene(scene);
-               stage.show();
+               stage.showAndWait(); // Use showAndWait to ensure the table is refreshed after the window is closed
+               refreshInventoryTable(); // Refresh table after updating a part
           } catch (IOException e) {
                e.printStackTrace();
                showErrorAlert("Error", "Failed to open Update Item window: " + e.getMessage());
@@ -351,22 +355,7 @@ public class HelloController implements Initializable {
           thresholdCol.setCellValueFactory(new PropertyValueFactory<>("lowStockThreshold"));
      }
 
-     public boolean partCodeExists(String partCode) {
-          return inventoryService.partCodeExists(partCode);
-     }
-
-     public boolean addNewPart(Part newPart) {
-          if (newPart == null) {
-               return false;
-          }
-          if (!inventoryService.addPart(newPart)) {
-               return false;
-          }
-          auditService.logInventoryAddAsAdmin(newPart.getPartCode(), newPart.getQuantity());
-          populateCategories();
-          resetFilters();
-          return true;
-     }
+     // Removed partCodeExists and addNewPart methods
 
      public void refreshInventoryTable() {
           inventoryService.persistAndResort();
