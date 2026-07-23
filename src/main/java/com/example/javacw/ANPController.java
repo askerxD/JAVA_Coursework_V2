@@ -1,8 +1,8 @@
 package com.example.javacw;
 
 import com.example.javacw.objects.Part;
-import com.example.javacw.service.PartService; // Import PartService
-import com.example.javacw.utils.ValidationUtil; // Keep for normalizeCategory if still used
+import com.example.javacw.service.PartService;
+import com.example.javacw.utils.ValidationUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -43,9 +43,9 @@ public class ANPController implements Initializable {
     private ImageView partImage;
 
 
-    private PartService partService; // Use PartService
+    private PartService partService;
 
-    public void setPartService(PartService partService) { // Update setter
+    public void setPartService(PartService partService) {
         this.partService = partService;
     }
 
@@ -93,7 +93,6 @@ public class ANPController implements Initializable {
                 lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
             }
 
-            // Use PartService for validation
             partService.validatePartData(partCode, description, brand, price, stockQty, category, dateAdded, imageName, lowStockThresholdValue);
 
             // Normalize category before creating Part object
@@ -104,7 +103,6 @@ public class ANPController implements Initializable {
 
             Part newPart = new Part(partCode, description, brand, price, stockQty, normalizedCategory, dateAddedStr, imageName, lowStockThresholdValue);
 
-            // Use PartService to add the part
             partService.addPart(newPart);
 
             showSuccessAlert("Success", "Part added successfully!");

@@ -42,8 +42,6 @@ public class HelloController implements Initializable {
      private Button updateSelectedButton;
      @FXML
      private Button deleteSelectedButton;
-     // Removed @FXML for lowStockThresholdSave
-     // Removed @FXML for lowStockThreshold
      @FXML
      private TextField keyworkSearchField;
      @FXML
@@ -355,12 +353,12 @@ public class HelloController implements Initializable {
           thresholdCol.setCellValueFactory(new PropertyValueFactory<>("lowStockThreshold"));
      }
 
-     // Removed partCodeExists and addNewPart methods
+
 
      public void refreshInventoryTable() {
           inventoryService.persistAndResort();
           populateCategories();
           resetFilters();
-          displayLowStockWarnings(); // Ensure warnings are refreshed after table update
+          displayLowStockWarnings();
      }
 }

@@ -7,21 +7,21 @@ import java.time.LocalDate;
 
 public class PartService {
 
-    private InventoryService inventoryService; // Use InventoryService
+    private InventoryService inventoryService;
 
     public PartService(InventoryService inventoryService) { // Constructor accepts InventoryService
         this.inventoryService = inventoryService;
     }
 
     public boolean partCodeExists(String partCode) {
-        return inventoryService.partCodeExists(partCode); // Delegate to InventoryService
+        return inventoryService.partCodeExists(partCode);
     }
 
     public void addPart(Part part) throws IllegalArgumentException {
         if (partCodeExists(part.getPartCode())) {
             throw new IllegalArgumentException("Part code '" + part.getPartCode() + "' already exists.");
         }
-        if (!inventoryService.addPart(part)) { // Delegate to InventoryService
+        if (!inventoryService.addPart(part)) {
             throw new IllegalArgumentException("Failed to add part to inventory.");
         }
     }

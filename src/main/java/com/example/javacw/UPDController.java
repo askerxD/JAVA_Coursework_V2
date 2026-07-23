@@ -2,7 +2,7 @@ package com.example.javacw;
 
 import com.example.javacw.objects.Part;
 import com.example.javacw.service.AuditService;
-import com.example.javacw.service.PartService; // Import PartService
+import com.example.javacw.service.PartService;
 import com.example.javacw.utils.ValidationUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -45,7 +45,7 @@ public class UPDController implements Initializable {
     private TextField image;
 
 
-    private PartService partService; // Use PartService
+    private PartService partService;
     private Part selectedPart;
     private String originalPartCode;
     private final AuditService auditService = AuditService.getDefault();
@@ -135,10 +135,8 @@ public class UPDController implements Initializable {
             String imageName = image.getText().trim();
             int lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
 
-            // Use PartService for validation
             partService.validatePartData(partCode, description, brand, price, stockQty, category, dateAdded, imageName, lowStockThresholdValue);
 
-            // Check for duplicate part code if it has changed
             if (!partCode.equalsIgnoreCase(originalPartCode) && partService.partCodeExists(partCode)) {
                 showErrorAlert("Duplicate Part Code",
                         "Part code '" + partCode + "' already exists. Please use a unique code.");
@@ -155,7 +153,6 @@ public class UPDController implements Initializable {
                         ", threshold=" + selectedPart.getLowStockThreshold() +
                         ", image=" + safe(selectedPart.getImage());
 
-                // Update the selectedPart object
                 selectedPart.setPartCode(partCode);
                 selectedPart.setName(description);
                 selectedPart.setBrand(brand);
@@ -168,7 +165,6 @@ public class UPDController implements Initializable {
                 selectedPart.setLowStockThreshold(lowStockThresholdValue);
                 selectedPart.setImage(imageName);
 
-                // Log audit
                 String after = "name=" + safe(description) +
                         ", brand=" + safe(brand) +
                         ", price=" + price +
