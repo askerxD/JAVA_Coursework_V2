@@ -37,7 +37,6 @@ class InventoryParserTest {
     @DisplayName("Test date comma legacy splitting protection")
     void testParseLegacyDateWithComma() throws IOException {
         Path file = tempDir.resolve("legacy_inventory.txt");
-        // Dates like "Jan 12, 2026" contain internal commas that should not break field parsing
         String content = "P003, Spark Plug, NGK, 15.0, 20, Engine, Jan 12, 2026, plug.png\n";
         Files.writeString(file, content);
 

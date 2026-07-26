@@ -64,7 +64,6 @@ class PartTest {
     @Test
     @DisplayName("Test total value calculation")
     void testGetTotalValue() {
-        // 45.50 * 10 = 455.0
         assertEquals(455.00, part.getTotalValue(), 0.001);
     }
 

@@ -38,7 +38,6 @@ class CartItemTest {
     @Test
     @DisplayName("Test subtotal calculation")
     void testGetSubtotal() {
-        // Price: 50.00, Quantity: 3 -> Subtotal: 150.00
         assertEquals(150.00, cartItem.getSubtotal(), 0.001);
     }
 
