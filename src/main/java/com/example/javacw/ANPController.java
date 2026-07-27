@@ -83,19 +83,17 @@ public class ANPController implements Initializable {
             String brand = Brand.getText().trim();
             double price = Double.parseDouble(Price.getText().trim());
             int stockQty = Integer.parseInt(StockQty.getText().trim());
-            String category = Category.getValue(); // Get raw category
+            String category = Category.getValue();
             LocalDate dateAdded = LastUpdated.getValue();
             String imageName = image.getText().trim();
 
-            // Get low stock threshold, default to 5 if empty
-            int lowStockThresholdValue = 5; // Default value
+            int lowStockThresholdValue = 5;
             if (!lsThreshold.getText().trim().isEmpty()) {
                 lowStockThresholdValue = Integer.parseInt(lsThreshold.getText().trim());
             }
 
             partService.validatePartData(partCode, description, brand, price, stockQty, category, dateAdded, imageName, lowStockThresholdValue);
 
-            // Normalize category before creating Part object
             String normalizedCategory = ValidationUtil.normalizeCategory(category);
             String dateAddedStr = dateAdded != null
                     ? dateAdded.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))

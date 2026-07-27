@@ -48,14 +48,12 @@ class DealerServiceTest {
 
         assertEquals(4, randomFour.size());
 
-        // Check uniqueness of dealer IDs
         long uniqueCount = randomFour.stream()
                 .map(Dealer::getDealerId)
                 .distinct()
                 .count();
         assertEquals(4, uniqueCount);
 
-        // Verify location sorting (e.g., Atlanta <= Boston <= Chicago...)
         for (int i = 0; i < randomFour.size() - 1; i++) {
             String currentLoc = randomFour.get(i).getLocation().toLowerCase();
             String nextLoc = randomFour.get(i + 1).getLocation().toLowerCase();
