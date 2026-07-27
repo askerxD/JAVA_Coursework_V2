@@ -33,7 +33,7 @@ class InventoryServiceTest {
     @Test
     @DisplayName("Test finding parts by part code")
     void testGetPartByCode() {
-        Part part = inventoryService.getPartByCode("p001"); // Case-insensitive
+        Part part = inventoryService.getPartByCode("p001");
         assertNotNull(part);
         assertEquals("Brake Pad", part.getName());
 
@@ -47,7 +47,6 @@ class InventoryServiceTest {
         assertTrue(inventoryService.addPart(newPart));
         assertTrue(inventoryService.partCodeExists("P003"));
 
-        // Adding duplicate part code should fail
         assertFalse(inventoryService.addPart(newPart));
     }
 
